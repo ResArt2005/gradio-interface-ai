@@ -1,0 +1,8 @@
+#resizable-chat {
+    resize: vertical;
+    overflow: auto;
+    min-height: 300px;
+    max-height: 90vh;
+    border: 1px solid #ccc;
+    padding: 10px;
+}
