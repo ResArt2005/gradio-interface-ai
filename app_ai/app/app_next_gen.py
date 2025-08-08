@@ -4,18 +4,18 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 import os
 import uuid
-
+from pathlib import Path
 FASTAPI_URL = "http://host.docker.internal:8000/query"
 # Загрузка внешних файлов
 try:
-    with open("styles.css", "r", encoding="utf-8") as f:
+    with open(Path(__file__).parent / "../static/styles.css", "r", encoding="utf-8") as f:
         CUSTOM_CSS = f.read()
 except FileNotFoundError:
     CUSTOM_CSS = ""
     print("⚠️  Файл styles.css не найден")
 
 try:
-    with open("script.js", "r", encoding="utf-8") as f:
+    with open(Path(__file__).parent / "../static/script.js", "r", encoding="utf-8") as f:
         CUSTOM_JS = f.read()
 except FileNotFoundError:
     CUSTOM_JS = ""
