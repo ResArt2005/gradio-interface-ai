@@ -249,6 +249,7 @@ with gr.Blocks(head=custom_head) as interface:
 
     # Привязки событий
     # Каждый чип вызывает chip_click с соответствующим index
+    btn:gr.Button
     for i, btn in enumerate(chip_buttons):
         btn.click(
             chip_click,
