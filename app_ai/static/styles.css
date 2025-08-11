@@ -6,3 +6,9 @@
     border: 1px solid #ccc;
     padding: 10px;
 }
+.chip-button:hover {
+    background: #e0e0e0;
+}
+#chips-container {
+    margin-bottom: 8px;
+}

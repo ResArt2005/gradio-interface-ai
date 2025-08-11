@@ -32,17 +32,17 @@ def parse_hierarchy(lines:list[str])->list[dict[str, any]]:
 
     return root
 
+tree:dict[str, any]
+#if __name__ == "__main__":
+file_path = Path(__file__).parent / "fast_prompt_list.txt"
+print(f"Чтение файла: {file_path}")
+try:
+    with open(file_path, encoding="utf-8") as f:
+        lines = f.readlines()
+    # Парсим иерархию из строк
+    tree = parse_hierarchy(lines)
 
-if __name__ == "__main__":
-    file_path = Path(__file__).parent / "fast_prompt_list.txt"
-    print(f"Чтение файла: {file_path}")
-    try:
-        with open(file_path, encoding="utf-8") as f:
-            lines = f.readlines()
-        
-        tree = parse_hierarchy(lines)
-
-        # Красиво выводим в JSON для проверки
-        print(json.dumps(tree, ensure_ascii=False, indent=4))
-    except FileNotFoundError:
-        print("⚠️  Файл с быстрыми запросами не найден")
+    # Красиво выводим в JSON для проверки
+    print(json.dumps(tree, ensure_ascii=False, indent=4))
+except FileNotFoundError:
+    print("⚠️  Файл с быстрыми запросами не найден")

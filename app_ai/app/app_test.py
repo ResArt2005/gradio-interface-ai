@@ -1,24 +1,26 @@
-# app.py
 import gradio as gr
 import requests
 from datetime import datetime
 from zoneinfo import ZoneInfo
-import os
+import os, sys
 import uuid
+from pathlib import Path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from tools.fast_prompt_script import tree
 
 # --- Настройки ---
 FASTAPI_URL = "http://host.docker.internal:8000/query"
-
+BASE_DIR = Path(__file__).parent
 # --- Загрузка внешних файлов ---
 try:
-    with open("../styles.css", "r", encoding="utf-8") as f:
+    with open(BASE_DIR / "../static/styles.css", "r", encoding="utf-8") as f:
         CUSTOM_CSS = f.read()
 except FileNotFoundError:
     CUSTOM_CSS = ""
     print("⚠️  Файл styles.css не найден")
 
 try:
-    with open("../script.js", "r", encoding="utf-8") as f:
+    with open(BASE_DIR / "../static/script.js", "r", encoding="utf-8") as f:
         CUSTOM_JS = f.read()
 except FileNotFoundError:
     CUSTOM_JS = ""
@@ -128,13 +130,92 @@ def rename_chat(new_title, current_chat_id, chat_titles):
         ""  # очистить поле ввода
     )
 
+# -----------------------------
+# --- Чипы (кнопки) над вводом ---
+# -----------------------------
+def max_buttons_in_tree(node_list):
+    # возвращает максимальное число siblings на любом уровне
+    if not node_list:
+        return 0
+    maxw = len(node_list)
+    for n in node_list:
+        children = n.get("children", [])
+        if children:
+            w = max_buttons_in_tree(children)
+            if w > maxw:
+                maxw = w
+    return maxw
+
+MAX_BUTTONS = max_buttons_in_tree(tree)
+
+def format_buttons_for_level(nodes):
+    """Возвращает список gr.update для всех MAX_BUTTONS кнопок."""
+    updates = []
+    for i in range(MAX_BUTTONS):
+        if i < len(nodes):
+            updates.append(gr.update(value=nodes[i]["name"], visible=True))
+        else:
+            updates.append(gr.update(visible=False))
+    return updates
+
+def chip_click(index, current_nodes_val, top_tree_val, suppress_reset_val, current_text):
+    """
+    При клике на чип:
+      - добавляем текст к textbox
+      - если есть children — показываем их
+      - если детей нет — скрываем все кнопки
+      - помечаем suppress_reset True (чтобы программная установка textbox не считалась ручной правкой)
+    """
+    no_ops = [gr.update() for _ in range(MAX_BUTTONS)]
+    if not current_nodes_val or index >= len(current_nodes_val):
+        return gr.update(), *no_ops, current_nodes_val, False
+
+    node = current_nodes_val[index]
+    node_name = node.get("name", "")
+    children = node.get("children", [])
+
+    # если есть дети — показываем их, если нет — список пуст (кнопки скрыты)
+    new_level = children if children else []
+
+    # добавляем текст
+    new_text = (current_text.strip() + " " + node_name) if current_text.strip() else node_name
+
+    btn_updates = format_buttons_for_level(new_level)
+    return gr.update(value=new_text), *btn_updates, new_level, True
+
+def on_textbox_change(text, current_nodes_val, suppress_reset_val, top_tree_val):
+    """
+    При изменении textbox:
+      - если suppress_reset == True => это программная установка, сбрасываем флаг
+      - иначе => пользователь вручную изменил текст => сбрасываем чипы на корень
+      - если корень пустой — скрываем все кнопки
+    """
+    if suppress_reset_val:
+        no_ops = [gr.update() for _ in range(MAX_BUTTONS)]
+        return (*no_ops, current_nodes_val, False)
+    else:
+        btn_updates = format_buttons_for_level(top_tree_val if top_tree_val else [])
+        return (*btn_updates, top_tree_val if top_tree_val else [], False)
+
+def reset_to_root(top_tree_val):
+    """Сброс чипов на корень (используется после submit)."""
+    btn_updates = format_buttons_for_level(top_tree_val)
+    return (*btn_updates, top_tree_val, False)
+
+# -----------------------------
 # --- Gradio Интерфейс ---
+# -----------------------------
 with gr.Blocks(head=custom_head) as interface:
     gr.Markdown("## 💬 Чат с RAG")
 
     chat_sessions = gr.State({})
     current_chat_id = gr.State(str(uuid.uuid4()))
     chat_titles = gr.State([])
+
+    # состояния для чипов
+    top_tree_state = gr.State(tree)
+    current_nodes = gr.State(tree)      # текущий набор узлов, соответствующий видимым чипам
+    suppress_reset = gr.State(False)    # флаг: было ли программное изменение textbox
 
     with gr.Row():
         with gr.Column(scale=1):
@@ -149,10 +230,40 @@ with gr.Blocks(head=custom_head) as interface:
                 type="messages",
                 elem_id="resizable-chat"
             )
+
+            # --- Чипы (кнопки) над полем ввода ---
+            with gr.Row(elem_id="chips_row"):
+                chip_buttons = []
+                for i in range(MAX_BUTTONS):
+                    if i < len(tree):
+                        lbl = tree[i]["name"]
+                        visible = True
+                    else:
+                        lbl = ""
+                        visible = False
+                    b = gr.Button(value=lbl, visible=visible, elem_id=f"chip_{i}")
+                    chip_buttons.append(b)
+
             textbox = gr.Textbox(placeholder="Введите вопрос...", lines=1, show_label=False)
             clear = gr.Button(value="Очистить", elem_id="clear_chat")
 
-    # Логика отправки сообщения
+    # Привязки событий
+    # Каждый чип вызывает chip_click с соответствующим index
+    for i, btn in enumerate(chip_buttons):
+        btn.click(
+            chip_click,
+            inputs=[gr.State(i), current_nodes, top_tree_state, suppress_reset, textbox],
+            outputs=[textbox, *chip_buttons, current_nodes, suppress_reset]
+        )
+
+    # Изменение textbox
+    textbox.change(
+        on_textbox_change,
+        inputs=[textbox, current_nodes, suppress_reset, top_tree_state],
+        outputs=[*chip_buttons, current_nodes, suppress_reset]
+    )
+
+    # Логика отправки сообщения: add_user_message -> fetch_llm_answer -> reset_to_root
     textbox.submit(
         add_user_message,
         [textbox, current_chat_id, chat_sessions, chat_titles],
@@ -161,9 +272,13 @@ with gr.Blocks(head=custom_head) as interface:
         fetch_llm_answer,
         [textbox, current_chat_id, chat_sessions],
         [chatbot, chat_sessions]
+    ).then(
+        reset_to_root,
+        [top_tree_state],
+        [*chip_buttons, current_nodes, suppress_reset]
     )
 
-    # Очистка чата
+    # Очистка чата (оставил поведение как было)
     clear.click(
         lambda: ([], None),
         None,
