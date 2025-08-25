@@ -1,4 +1,3 @@
-import gradio as gr
 from ui.layout import build_interface
 
 if __name__ == "__main__":
