@@ -1,45 +1,6 @@
 import gradio as gr
-from tools.chat_utils import (
-    clear_current_chat, fetch_llm_answer, new_chat, switch_chat, rename_chat, format_message
-)
 from tools.fast_prompt_script import tree
 
-# --- Синхронизация чатов ---
-def sync_chat_list(chat_titles, current_chat_id):
-    titles = [t for t, _ in chat_titles]
-    active = next((t for t, cid in chat_titles if cid == current_chat_id), None)
-    if not titles:
-        return gr.update(choices=[])
-    return gr.update(choices=titles, value=active)
-
-# --- Добавление сообщения ---
-def add_user_message(message, chat_id, chat_sessions, chat_titles):
-    if chat_id not in chat_sessions:
-        chat_sessions[chat_id] = []
-        title = f"Новый чат {len(chat_titles) + 1}"
-        chat_titles.append((title, chat_id))
-
-    user_msg = {"role": "user", "content": format_message("user", message)}
-    chat_sessions[chat_id].append(user_msg)
-
-    value = None
-    if len(chat_sessions[chat_id]) == 1:
-        short_title = " ".join(message.strip().split()[:4]) + ("..." if len(message.strip().split()) > 4 else "")
-        chat_titles = [(short_title if cid == chat_id else title, cid) for title, cid in chat_titles]
-        value = short_title
-
-    active_title = next((title for title, cid in chat_titles if cid == chat_id), None)
-    choices = [t[0] for t in chat_titles]
-    selected = value or active_title
-
-    if selected not in choices:
-        return gr.update(value="", autofocus=True), chat_sessions[chat_id], chat_sessions, chat_titles, gr.update(choices=choices)
-
-    return gr.update(value="", autofocus=True), chat_sessions[chat_id], chat_sessions, chat_titles, gr.update(
-        choices=choices, value=selected
-    )
-
-# --- Чипы (Prompt Tree) ---
 def max_buttons_in_tree(node_list):
     if not node_list:
         return 0

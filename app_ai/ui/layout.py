@@ -2,8 +2,8 @@ import gradio as gr
 import uuid
 from pathlib import Path
 from tools.fast_prompt_script import tree
-from ui import events
-
+from events import events
+from events.bindings import bind_events
 BASE_DIR = Path(__file__).parent.parent
 
 try:
@@ -74,66 +74,10 @@ def build_interface():
                 clear = gr.Button(value="Очистить", elem_id="clear_chat")
 
         # --- Events binding ---
-        for i, btn in enumerate(chip_buttons):
-            btn.click(
-                events.chip_click,
-                inputs=[gr.State(i), current_nodes, top_tree_state, suppress_reset, textbox],
-                outputs=[textbox, *chip_buttons, current_nodes, suppress_reset]
-            )
-
-        textbox.change(
-            events.on_textbox_change,
-            inputs=[textbox, current_nodes, suppress_reset, top_tree_state],
-            outputs=[*chip_buttons, current_nodes, suppress_reset]
-        )
-
-        def focus_textbox():
-            return gr.update(autofocus=True)
-
-        textbox.submit(
-            events.add_user_message,
-            [textbox, current_chat_id, chat_sessions, chat_titles],
-            [textbox, chatbot, chat_sessions, chat_titles, chat_list]
-        ).then(
-            events.fetch_llm_answer,
-            [textbox, current_chat_id, chat_sessions],
-            [chatbot, chat_sessions]
-        ).then(
-            events.reset_to_root,
-            [top_tree_state],
-            [*chip_buttons, current_nodes, suppress_reset]
-        ).then(
-            focus_textbox, [], [textbox]
-        )
-
-        clear.click(
-            events.clear_current_chat,
-            [current_chat_id, chat_sessions],
-            [chatbot, chat_sessions]
-        ).then(focus_textbox, [], [textbox])
-
-        new_chat_btn.click(
-            events.new_chat,
-            [chat_sessions, chat_titles],
-            [current_chat_id, chat_sessions, chat_titles, chat_list]
-        ).then(focus_textbox, [], [textbox])
-
-        chat_list.change(
-            events.switch_chat,
-            [chat_list, chat_titles, chat_sessions],
-            [current_chat_id, chatbot]
-        ).then(focus_textbox, [], [textbox])
-
-        rename_btn.click(
-            events.rename_chat,
-            [rename_box, current_chat_id, chat_titles],
-            [chat_titles, chat_list, rename_box]
-        ).then(focus_textbox, [], [textbox])
-
-        interface.load(
-            events.sync_chat_list,
-            [chat_titles, current_chat_id],
-            [chat_list]
-        ).then(focus_textbox, [], [textbox])
+        bind_events((
+            chip_buttons, textbox, chatbot, clear, new_chat_btn, chat_list,
+            rename_btn, rename_box, current_chat_id, chat_sessions,
+            chat_titles, top_tree_state, current_nodes, suppress_reset, interface
+        ))
 
     return interface
