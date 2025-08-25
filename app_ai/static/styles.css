@@ -52,7 +52,21 @@ body.resizing-chat {
   user-select: none !important;
   cursor: ns-resize !important;
 }
-
+/* Стили для кнопок с быстрыми запросами */
+#chips_row{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+.chip-button{
+  white-space: normal; 
+  word-break: break-word;
+  font-size: 1vw;
+  text-align: center;
+  height: 100%;
+  color: white !important;
+  background-color: #323ad1 !important;
+}
 .chip-button:hover {
     background: #e0e0e0;
 }
@@ -62,3 +76,13 @@ body.resizing-chat {
 
 /* Скрыть кнопку "Очистить", но оставить её в DOM */
 #clear_chat { display: none !important; }
+/* Стили для кнопки переименовать */
+#rename_chat {
+  color: white !important;
+  background-color: #323ad1 !important;
+}
+/* Стили для кнопки создания нового чата */
+#new_chat {
+  color: white !important;
+  background-color: #323ad1 !important;
+}

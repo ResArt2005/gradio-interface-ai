@@ -45,10 +45,10 @@ def build_interface():
 
         with gr.Row():
             with gr.Column(scale=1):
-                new_chat_btn = gr.Button("+ Новый чат")
+                new_chat_btn = gr.Button(value="+ Новый чат", elem_id="new_chat")
                 chat_list = gr.Radio(choices=[], label="Чаты", interactive=True)
                 rename_box = gr.Textbox(placeholder="Переименовать чат", lines=1, show_label=False)
-                rename_btn = gr.Button("Переименовать")
+                rename_btn = gr.Button(value="Переименовать", elem_id="rename_chat")
             with gr.Column(scale=4):
                 chatbot = gr.Chatbot(
                     label="Диалог", render_markdown=True,
@@ -64,7 +64,7 @@ def build_interface():
                         else:
                             lbl = ""
                             visible = False
-                        b = gr.Button(value=lbl, visible=visible, elem_id=f"chip_{i}")
+                        b = gr.Button(value=lbl, visible=visible, elem_id=f"chip_{i}", elem_classes="chip-button")
                         chip_buttons.append(b)
 
                 textbox = gr.Textbox(
