@@ -13,14 +13,14 @@ FASTAPI_URL = "http://host.docker.internal:8000/query"
 BASE_DIR = Path(__file__).parent
 # --- Загрузка внешних файлов ---
 try:
-    with open(BASE_DIR / "../static/styles.css", "r", encoding="utf-8") as f:
+    with open(BASE_DIR / "static/styles.css", "r", encoding="utf-8") as f:
         CUSTOM_CSS = f.read()
 except FileNotFoundError:
     CUSTOM_CSS = ""
     print("⚠️  Файл styles.css не найден")
 
 try:
-    with open(BASE_DIR / "../static/script.js", "r", encoding="utf-8") as f:
+    with open(BASE_DIR / "static/script.js", "r", encoding="utf-8") as f:
         CUSTOM_JS = f.read()
 except FileNotFoundError:
     CUSTOM_JS = ""
@@ -41,6 +41,24 @@ window.addEventListener('load', function () {{
 }});
 </script>
 """
+
+# --- Очищение текущего чата ---
+def clear_current_chat(chat_id, chat_sessions):
+    # аккуратно инициализируем на всякий случай
+    if chat_sessions is None:
+        chat_sessions = {}
+    if chat_id not in chat_sessions:
+        chat_sessions[chat_id] = []
+    # вернуть пустую историю текущего чата и неизменённый словарь сессий
+    return [], chat_sessions
+
+# --- Синхронизация списка чатов при загрузке интерфейса ---
+def sync_chat_list(chat_titles, current_chat_id):
+    titles = [t for t, _ in chat_titles]
+    active = next((t for t, cid in chat_titles if cid == current_chat_id), None)
+    if not titles:
+        return gr.update(choices=[])
+    return gr.update(choices=titles, value=active)
 
 # --- Форматирование сообщений с временем ---
 def format_message(role, content):
@@ -66,11 +84,19 @@ def add_user_message(message, chat_id, chat_sessions, chat_titles):
         value = short_title
 
     active_title = next((title for title, cid in chat_titles if cid == chat_id), None)
-    return "", chat_sessions[chat_id], chat_sessions, chat_titles, gr.update(
-        choices=[t[0] for t in chat_titles],
-        value=value or active_title
+        
+    choices = [t[0] for t in chat_titles]
+    selected = value or active_title
+    
+    # если выбранного ещё нет в списке — сначала только обновим список, без value
+    if selected not in choices:
+        return gr.update(value="", autofocus=True), chat_sessions[chat_id], chat_sessions, chat_titles, gr.update(choices=choices)
+    
+    # иначе можно сразу задать и choices, и value
+    return gr.update(value="", autofocus=True), chat_sessions[chat_id], chat_sessions, chat_titles, gr.update(
+        choices=choices,
+        value=selected
     )
-
 # --- Получение ответа от LLM через FastAPI ---
 def fetch_llm_answer(_, chat_id, chat_sessions):
     if chat_id not in chat_sessions:
@@ -181,7 +207,7 @@ def chip_click(index, current_nodes_val, top_tree_val, suppress_reset_val, curre
     new_text = (current_text.strip() + " " + node_name) if current_text.strip() else node_name
 
     btn_updates = format_buttons_for_level(new_level)
-    return gr.update(value=new_text), *btn_updates, new_level, True
+    return gr.update(value=new_text, autofocus=True), *btn_updates, new_level, True
 
 def on_textbox_change(text, current_nodes_val, suppress_reset_val, top_tree_val):
     """
@@ -244,11 +270,18 @@ with gr.Blocks(head=custom_head) as interface:
                     b = gr.Button(value=lbl, visible=visible, elem_id=f"chip_{i}")
                     chip_buttons.append(b)
 
-            textbox = gr.Textbox(placeholder="Введите вопрос...", lines=1, show_label=False)
+            textbox = gr.Textbox(
+                placeholder="Введите вопрос...",
+                lines=1,
+                show_label=False,
+                elem_id="main_input"    # определяем элемент
+            )
+
             clear = gr.Button(value="Очистить", elem_id="clear_chat")
 
     # Привязки событий
     # Каждый чип вызывает chip_click с соответствующим index
+    btn:gr.Button
     for i, btn in enumerate(chip_buttons):
         btn.click(
             chip_click,
@@ -264,6 +297,9 @@ with gr.Blocks(head=custom_head) as interface:
     )
 
     # Логика отправки сообщения: add_user_message -> fetch_llm_answer -> reset_to_root
+    def focus_textbox():
+        return gr.update(autofocus=True)
+    
     textbox.submit(
         add_user_message,
         [textbox, current_chat_id, chat_sessions, chat_titles],
@@ -276,13 +312,19 @@ with gr.Blocks(head=custom_head) as interface:
         reset_to_root,
         [top_tree_state],
         [*chip_buttons, current_nodes, suppress_reset]
+    ).then(
+        focus_textbox,
+        [],
+        [textbox]  # вернуть фокус
     )
 
-    # Очистка чата (оставил поведение как было)
+    # Очистка чата
     clear.click(
-        lambda: ([], None),
-        None,
+        clear_current_chat,
+        [current_chat_id, chat_sessions],
         [chatbot, chat_sessions]
+    ).then(
+        focus_textbox, [], [textbox]
     )
 
     # Новый чат
@@ -290,13 +332,17 @@ with gr.Blocks(head=custom_head) as interface:
         new_chat,
         [chat_sessions, chat_titles],
         [current_chat_id, chat_sessions, chat_titles, chat_list]
+    ).then(
+        focus_textbox, [], [textbox]
     )
-
+    
     # Переключение чата
     chat_list.change(
         switch_chat,
         [chat_list, chat_titles, chat_sessions],
         [current_chat_id, chatbot]
+    ).then(
+        focus_textbox, [], [textbox]
     )
 
     # Переименование
@@ -304,6 +350,17 @@ with gr.Blocks(head=custom_head) as interface:
         rename_chat,
         [rename_box, current_chat_id, chat_titles],
         [chat_titles, chat_list, rename_box]
+    ).then(
+        focus_textbox, [], [textbox]
+    )
+    
+    # вызов load — здесь, внутри блока, для прогрузки интерфейса до запуска
+    interface.load(
+        sync_chat_list,
+        [chat_titles, current_chat_id],
+        [chat_list]
+    ).then(
+        focus_textbox, [], [textbox]
     )
 
 # --- Запуск приложения ---

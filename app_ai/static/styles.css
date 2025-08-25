@@ -1,14 +1,64 @@
+/* Контейнер чата */
 #resizable-chat {
-    resize: vertical;
-    overflow: auto;
-    min-height: 300px;
-    max-height: 90vh;
-    border: 1px solid #ccc;
-    padding: 10px;
+  flex: 0 0 auto;
+  height: 50vh;
+  min-height: 300px;
+  max-height: 90vh;
+  overflow: auto;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 2;     /* позиция слоя, чат выше соседей */
+  margin-bottom: 3px;
 }
+
+/* Внутренняя обёртка, растягиваем на доступную высоту */
+#resizable-chat .wrap { height: 100% !important; }
+
+/* Ручка растягивания: 3 линии, убывающие по ширине */
+#chat-resize-handle{
+  position: relative;
+  z-index: 3;               /* позиция слоя, чтобы точно не перекрылось */
+  height: 8px;              /* видимая высота ручки */
+  cursor: ns-resize;
+  user-select: none;
+  margin-top: -6px;         /* верхняя граница, или работает странно или не работает, нужно разбираться */
+  color: #c7c7c7;           /* цвет линий (используем currentColor ниже) */
+
+  /* 3 слоя:
+     1) верхняя линия — 100% ширины
+     2) средняя — 66% ширины
+     3) нижняя — 33% ширины
+     все по 1px толщиной, по центру по горизонтали
+  */
+  background:
+    linear-gradient(currentColor, currentColor) top    center / 100% 1px no-repeat,
+    linear-gradient(currentColor, currentColor) center center / 66%  1px no-repeat,
+    linear-gradient(currentColor, currentColor) bottom center / 33%  1px no-repeat;
+}
+
+/* Задаём кликабельную зону, чтобы тонкую ручку было легко поймать */
+#chat-resize-handle::before{
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  top: -6px; bottom: -6px;  /* +16px к hit-box */
+}
+
+/* Небольшой ховер-контраст */
+#chat-resize-handle:hover { color: #a9aeb3; }
+
+/* Пока тянем — отключаем выделение текста и меняем курсор */
+body.resizing-chat {
+  user-select: none !important;
+  cursor: ns-resize !important;
+}
+
 .chip-button:hover {
     background: #e0e0e0;
 }
 #chips-container {
     margin-bottom: 8px;
 }
+
+/* Скрыть кнопку "Очистить", но оставить её в DOM */
+#clear_chat { display: none !important; }
