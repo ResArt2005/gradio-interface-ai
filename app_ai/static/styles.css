@@ -87,13 +87,20 @@ body.resizing-chat {
   background-color: #323ad1 !important;
 }
 /* Контейнер вариантов радио — колоночный список с прокруткой */
+.wrap.svelte-1kzox3m{
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start; /* не растягивать детей по ширине, брать ширину контента */
+  gap: 8px; /* при необходимости отрегулируйте */
+}
 #chat_list [role="radiogroup"]{
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: calc(100vh - 260px); /* при необходимости подстройте */
-  overflow: auto;
-  padding-right: 4px;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  max-height: calc(100vh - 260px) !important; /* при необходимости подстройте */
+  overflow: auto !important;
+  padding-right: 4px !important;
+  align-items: flex-start !important; /* ключевая строка */
 }
 
 /* Прячем нативные кружки */
@@ -105,7 +112,7 @@ body.resizing-chat {
 
 /* Каждая опция — одна строка: текст слева (обрезается), кнопка справа */
 #chat_list input[type="radio"] + label{
-  display: flex;
+  display: inline-flex; /* inline-flex + родитель align-items:flex-start даст ширину по контенту */
   align-items: center;
   gap: 8px;
   padding: 8px 8px 8px 12px;
@@ -116,6 +123,8 @@ body.resizing-chat {
   line-height: 1.2;
   cursor: pointer;
   transition: background .15s, border-color .15s, color .15s;
+  width: fit-content;    /* опционально, для явного подстраивания по содержимому */
+  white-space: nowrap;   /* если нужно не переносить текст на новую строку */
 }
 
 /* Ховер/фокус/активная */
