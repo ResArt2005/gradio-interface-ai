@@ -86,3 +86,78 @@ body.resizing-chat {
   color: white !important;
   background-color: #323ad1 !important;
 }
+/* Контейнер вариантов радио — колоночный список с прокруткой */
+#chat_list [role="radiogroup"]{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: calc(100vh - 260px); /* при необходимости подстройте */
+  overflow: auto;
+  padding-right: 4px;
+}
+
+/* Прячем нативные кружки */
+#chat_list input[type="radio"]{
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Каждая опция — одна строка: текст слева (обрезается), кнопка справа */
+#chat_list input[type="radio"] + label{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 8px 8px 12px;
+  border-radius: 10px;
+  background: #F1F2F4;
+  border: 1px solid #E7E7E9;
+  color: #111;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+
+/* Ховер/фокус/активная */
+#chat_list input[type="radio"] + label:hover{
+  background:#ECEEF2;
+  border-color:#D9DCE1; 
+}
+#chat_list input[type="radio"]:focus + label{
+  box-shadow:0 0 0 2px rgba(59,130,246,.25) inset;
+  outline:none;
+}
+#chat_list input[type="radio"]:checked + label{
+  background:#111; color:#fff;
+  border-color:#111;
+}
+
+/* Текстовая часть — одна строка с троеточием */
+#chat_list .chat-title{
+  flex: 1 1 auto;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Кнопка «гамбургер» справа */
+#chat_list .chat-hamburger{
+  flex: 0 0 auto;
+  width: 28px; height: 28px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: none; border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+#chat_list .chat-hamburger:hover{
+  background: rgba(0,0,0,.06);
+}
+
+/* Тёмная тема — опционально */
+@media (prefers-color-scheme: dark){
+  #chat_list input[type="radio"] + label{ background:#2B2D31; border-color:#3A3D42; color:#E9EAEC; }
+  #chat_list input[type="radio"] + label:hover{ background:#32353B; border-color:#42464C; }
+  #chat_list input[type="radio"]:checked + label{ background:#0F1115; border-color:#0F1115; color:#fff; }
+  #chat_list .chat-hamburger:hover{ background: rgba(255,255,255,.08); }
+}

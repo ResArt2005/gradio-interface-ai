@@ -46,7 +46,13 @@ def build_interface():
         with gr.Row():
             with gr.Column(scale=1):
                 new_chat_btn = gr.Button(value="+ Новый чат", elem_id="new_chat")
-                chat_list = gr.Radio(choices=[], label="Чаты", interactive=True)
+                chat_list = gr.Radio(
+                    choices=[], 
+                    label="Чаты", 
+                    interactive=True, 
+                    elem_id="chat_list", 
+                    elem_classes="custom-radio"
+                )
                 rename_box = gr.Textbox(placeholder="Переименовать чат", lines=1, show_label=False)
                 rename_btn = gr.Button(value="Переименовать", elem_id="rename_chat")
             with gr.Column(scale=4):
@@ -73,6 +79,7 @@ def build_interface():
                 )
                 clear = gr.Button(value="Очистить", elem_id="clear_chat")
 
+ 
         # --- Events binding ---
         bind_events((
             chip_buttons, textbox, chatbot, clear, new_chat_btn, chat_list,
