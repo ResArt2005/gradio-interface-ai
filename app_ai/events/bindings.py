@@ -8,7 +8,8 @@ def bind_events(components:tuple):
     (
         chip_buttons, textbox, chatbot, clear, new_chat_btn, chat_list,
         rename_btn, rename_box, current_chat_id, chat_sessions,
-        chat_titles, top_tree_state, current_nodes, suppress_reset, interface
+        chat_titles, top_tree_state, current_nodes, suppress_reset, interface,
+        burger_btn_gr
     ) = components
 
     # --- Events binding ---
@@ -44,6 +45,11 @@ def bind_events(components:tuple):
     ).then(focus_textbox, [], [textbox])
 
     chat_list.change(switch_chat, [chat_list, chat_titles, chat_sessions],
+                     [current_chat_id, chatbot]
+    ).then(focus_textbox, [], [textbox])
+    
+    # На тестировании
+    burger_btn_gr.click(switch_chat, [chat_list, chat_titles, chat_sessions],
                      [current_chat_id, chatbot]
     ).then(focus_textbox, [], [textbox])
 

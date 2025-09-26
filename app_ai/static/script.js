@@ -160,7 +160,16 @@
         .observe(document.body, { childList: true, subtree: true });
     }
   })();
-
+  //=== Симуляция клика по градио элементу  ===
+  function simulateClick(id) {
+    const el = document.querySelector(id);
+    if (!el) return;
+    try {
+      el.click();
+    } catch (_) {
+      el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+    }
+  }
   // === Скрипт для единого бургер-меню, которое переиспользуется для всех троеточий ===
   (function () {
     // Глобальный синглтон, чтобы защититься от повторного монтирования при двойной вставке скрипта
@@ -217,6 +226,7 @@
         const renameBtn = document.createElement("button");
         renameBtn.type = "button";
         renameBtn.textContent = "Переименовать чат";
+        renameBtn.id = "rename_chat";
         Object.assign(renameBtn.style, {
           display: "block",
           width: "100%",
@@ -229,12 +239,8 @@
         });
         renameBtn.addEventListener("mouseenter", () => renameBtn.style.background = "rgba(0,0,0,0.03)");
         renameBtn.addEventListener("mouseleave", () => renameBtn.style.background = "transparent");
-        renameBtn.addEventListener("click", (ev) => {
-          ev.stopPropagation();
-          const possible = document.querySelector("#chat_title, .chat-title, h1, header h1");
-          const current = possible?.textContent?.trim() ?? "";
-          const name = prompt("Новое название чата", current);
-          if (name != null && possible) possible.textContent = name;
+        renameBtn.addEventListener("click", () => {
+          simulateClick("#gr_rename_chat");
           hideAllMenus();
         });
 
@@ -336,6 +342,7 @@
       label.dataset.__ellipsisProcessed = "1";
 
       btn.addEventListener("click", (e) => {
+        simulateClick("#gr_burger")
         e.stopPropagation();
         const menu = getSharedMenu();
         if (menu && menu._visible && menu._anchor === btn) {

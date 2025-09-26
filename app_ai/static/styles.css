@@ -148,37 +148,37 @@ body.resizing-chat {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-/*.vertical-ellipsis-menu-root{
-  position: fixed!important;
-  top: 0px!important;
-  left: 0px!important;
+.vertical-ellipsis-menu-root{
+  position: fixed;
+  top: 0px;
+  left: 0px;
   zIndex: 2147483000;
-  pointerEvents: none!important;
+  pointerEvents: none;
 }
-.vertical-ellipsis-menu-shared{
-  position: absolute!important;
-  pointerEvents: auto!important;
-  minWidth: 160px!important;
-  background: #fff!important;
-  color:#111!important;
-  borderRadius: 8px!important;
-  boxShadow: 0 6px 18px rgba(0,0,0,0.12)!important;
-  padding: 6px!important;
-  fontSize: 13px!important;
-  transformOrigin: left center!important;
+/*.vertical-ellipsis-menu-shared{
+  position: absolute;
+  pointerEvents: auto;
+  minWidth: 160px;
+  background: #fff;
+  color:#111;
+  borderRadius: 8px;
+  boxShadow: 0 6px 18px rgba(0,0,0,0.12);
+  padding: 6px;
+  fontSize: 13px;
+  transformOrigin: left center;
   display: none;
 }
 .renameBtn{
-  display: block!important;
-  width: 100%!important;
-  textAlign: left!important;
-  padding: 8px 10px!important;
-  background: transparent!important;
-  border: none!important;
-  cursor: pointer!important;
-  borderRadius: 6px!important;
+  display: block;
+  width: 100%;
+  textAlign: left;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  borderRadius: 6px;
 }
-.renameBtn:hover{ background: rgba(0,0,0,0.03)!important; }*/
+.renameBtn:hover{ background: rgba(0,0,0,0.03); }*/
 
 /* Тёмная тема — опционально */
 @media (prefers-color-scheme: dark){
@@ -186,4 +186,9 @@ body.resizing-chat {
   #chat_list input[type="radio"] + label:hover{ background:#32353B; border-color:#42464C; }
   #chat_list input[type="radio"]:checked + label{ background:#0F1115; border-color:#0F1115; color:#fff; }
   #chat_list .chat-hamburger:hover{ background: rgba(255,255,255,.08); }
+}
+
+/* Стили gr элементов */
+#gr_rename_chat, #gr_burger{
+  display: none!important;
 }

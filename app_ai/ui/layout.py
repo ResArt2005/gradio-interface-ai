@@ -54,7 +54,6 @@ def build_interface():
                     elem_classes="custom-radio"
                 )
                 rename_box = gr.Textbox(placeholder="Переименовать чат", lines=1, show_label=False)
-                rename_btn = gr.Button(value="Переименовать", elem_id="rename_chat")
             with gr.Column(scale=4):
                 chatbot = gr.Chatbot(
                     label="Диалог", render_markdown=True,
@@ -79,12 +78,16 @@ def build_interface():
                 )
                 clear = gr.Button(value="Очистить", elem_id="clear_chat")
 
- 
+        #Невидимые элементы градио для кнтренней логики
+        rename_btn_gr = gr.Button(value="gr_test", elem_id="gr_rename_chat")
+        #Должен изменять current_chat_id
+        burger_btn_gr = gr.Button(value="gr_test", elem_id="gr_burger")
         # --- Events binding ---
         bind_events((
             chip_buttons, textbox, chatbot, clear, new_chat_btn, chat_list,
-            rename_btn, rename_box, current_chat_id, chat_sessions,
-            chat_titles, top_tree_state, current_nodes, suppress_reset, interface
+            rename_btn_gr, rename_box, current_chat_id, chat_sessions,
+            chat_titles, top_tree_state, current_nodes, suppress_reset, interface,
+            burger_btn_gr
         ))
 
     return interface
