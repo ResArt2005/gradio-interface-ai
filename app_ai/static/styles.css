@@ -148,20 +148,37 @@ body.resizing-chat {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-
-/* Кнопка «гамбургер» справа */
-#chat_list .chat-hamburger{
-  flex: 0 0 auto;
-  width: 28px; height: 28px;
-  display: inline-flex; align-items: center; justify-content: center;
-  border: none; border-radius: 6px;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
+/*.vertical-ellipsis-menu-root{
+  position: fixed!important;
+  top: 0px!important;
+  left: 0px!important;
+  zIndex: 2147483000;
+  pointerEvents: none!important;
 }
-#chat_list .chat-hamburger:hover{
-  background: rgba(0,0,0,.06);
+.vertical-ellipsis-menu-shared{
+  position: absolute!important;
+  pointerEvents: auto!important;
+  minWidth: 160px!important;
+  background: #fff!important;
+  color:#111!important;
+  borderRadius: 8px!important;
+  boxShadow: 0 6px 18px rgba(0,0,0,0.12)!important;
+  padding: 6px!important;
+  fontSize: 13px!important;
+  transformOrigin: left center!important;
+  display: none;
 }
+.renameBtn{
+  display: block!important;
+  width: 100%!important;
+  textAlign: left!important;
+  padding: 8px 10px!important;
+  background: transparent!important;
+  border: none!important;
+  cursor: pointer!important;
+  borderRadius: 6px!important;
+}
+.renameBtn:hover{ background: rgba(0,0,0,0.03)!important; }*/
 
 /* Тёмная тема — опционально */
 @media (prefers-color-scheme: dark){
