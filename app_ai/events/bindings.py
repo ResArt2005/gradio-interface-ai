@@ -1,7 +1,8 @@
 import gradio as gr
 from events.events import (
     chip_click, on_textbox_change, add_user_message, fetch_llm_answer,
-    reset_to_root, clear_current_chat, new_chat, switch_chat, rename_chat, sync_chat_list
+    reset_to_root, clear_current_chat, new_chat, switch_chat, rename_chat, sync_chat_list,
+    switch_current_chat_id
 )
 
 def bind_events(components:tuple):
@@ -49,13 +50,13 @@ def bind_events(components:tuple):
     ).then(focus_textbox, [], [textbox])
     
     # На тестировании
-    burger_btn_gr.click(switch_chat, [chat_list, chat_titles, chat_sessions],
-                     [current_chat_id, chatbot]
-    ).then(focus_textbox, [], [textbox])
+    #burger_btn_gr.click(switch_current_chat_id, [chat_list, chat_titles],
+    #                 [current_chat_id]
+    #).then(focus_textbox, [], [textbox])
 
-    rename_btn.click(rename_chat, [rename_box, current_chat_id, chat_titles],
-                     [chat_titles, chat_list, rename_box]
-    ).then(focus_textbox, [], [textbox])
+    #rename_btn.click(rename_chat, [rename_box, current_chat_id, chat_titles],
+    #                 [chat_titles, chat_list, rename_box]
+    #).then(focus_textbox, [], [textbox])
 
     interface.load(sync_chat_list, [chat_titles, current_chat_id], [chat_list]
     ).then(focus_textbox, [], [textbox])

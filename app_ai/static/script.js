@@ -161,14 +161,15 @@
     }
   })();
   //=== Симуляция клика по градио элементу  ===
-  function simulateClick(id) {
-    const el = document.querySelector(id);
+  function simulateClickById(id, clickedId) {
+    const el = document.querySelector("#"+id);
     if (!el) return;
     try {
       el.click();
     } catch (_) {
       el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
     }
+    el.dataset.clickedId = clickedId;
   }
   // === Скрипт для единого бургер-меню, которое переиспользуется для всех троеточий ===
   (function () {
@@ -239,10 +240,155 @@
         });
         renameBtn.addEventListener("mouseenter", () => renameBtn.style.background = "rgba(0,0,0,0.03)");
         renameBtn.addEventListener("mouseleave", () => renameBtn.style.background = "transparent");
+        // --- Запоминаем 'target label' когда кликают на вертикальное меню внутри label ---
+        // Используем делегирование, чтобы работать с динамически добавляемыми элементами.
+        document.addEventListener('click', (e) => {
+          const vBtn = e.target.closest('.vertical-ellipsis-btn');
+          if (vBtn) {
+            // запомним родительский label как цель для "переименовать"
+            window.__renameTargetLabel = vBtn.closest('label.svelte-1bx8sav') || null;
+          }
+        }, true);
+
+        // --- Хранение текущего состояния редактирования (только один одновременно) ---
+        window.__currentEditing = null; // будет объект { label, span, input, originalText, handlers... }
+
+        // --- Обработчик кнопки переименовать (оставляем simulateClickById / hideAllMenus) ---
         renameBtn.addEventListener("click", () => {
-          simulateClick("#gr_rename_chat");
+          // не трогаем:
+          simulateClickById("gr_rename_chat", renameBtn.id);
+
+          // выбираем целевой label:
+          let label = window.__renameTargetLabel
+                  || document.querySelector('label.svelte-1bx8sav.selected')
+                  || document.querySelector('label.svelte-1bx8sav'); // fallback
+          if (!label) {
+            hideAllMenus();
+            return;
+          }
+
+          // Если уже редактируется этот же label — просто фокусируем поле:
+          if (window.__currentEditing && window.__currentEditing.label === label) {
+            window.__currentEditing.input.focus();
+            return;
+          }
+
+          // Если редактируется другой label — отменим его редактирование (восстановим оригинал).
+          if (window.__currentEditing) {
+            // отмена предыдущего (не сохраняем)
+            const prev = window.__currentEditing;
+            document.removeEventListener('keydown', prev.keydownHandler, true);
+            document.removeEventListener('click', prev.outsideClickHandler, true);
+            prev.input.remove();
+            prev.span.style.display = '';
+            window.__currentEditing = null;
+          }
+
+          const span = label.querySelector('span.svelte-1bx8sav');
+          if (!span) {
+            hideAllMenus();
+            return;
+          }
+
+          const originalText = span.textContent;
+
+          // Создаём input и подгоняем стиль под span (минимально)
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.value = originalText;
+          input.className = 'inline-rename-input';
+
+          // Поддержать похожий вид/ширину:
+          const spanStyle = window.getComputedStyle(span);
+          input.style.font = spanStyle.font;
+          input.style.fontSize = spanStyle.fontSize;
+          input.style.lineHeight = spanStyle.lineHeight;
+          input.style.padding = '0 4px';
+          input.style.margin = '0';
+          input.style.border = '1px solid rgba(0,0,0,0.2)';
+          input.style.borderRadius = '4px';
+          input.style.background = 'transparent';
+          input.style.outline = 'none';
+          // ставим ширину примерно как span (плюс небольшой запас)
+          input.style.width = Math.max(80, span.offsetWidth + 20) + 'px';
+          // вставляем input сразу после span, скрыв span
+          span.style.display = 'none';
+          span.insertAdjacentElement('afterend', input);
+
+          // фокусируем и ставим курсор в конец
+          input.focus();
+          try { input.setSelectionRange(input.value.length, input.value.length); } catch (e) { /* ignore */ }
+
+          // состояние и обработчики
+          const state = {
+            label,
+            span,
+            input,
+            originalText,
+            keydownHandler: null,
+            outsideClickHandler: null
+          };
+          window.__currentEditing = state;
+
+          // Завершение (save = true сохраняет, false — восстанавливает original)
+          function finish(save) {
+            if (!window.__currentEditing) return;
+            document.removeEventListener('keydown', state.keydownHandler, true);
+            document.removeEventListener('click', state.outsideClickHandler, true);
+
+            if (save) {
+              state.span.textContent = state.input.value;
+            } else {
+              state.span.textContent = state.originalText;
+            }
+            state.input.remove();
+            state.span.style.display = '';
+            // очистим целевой label (чтобы при следующем открытии меню использовалась актуальная цель)
+            // (можно оставить, но безопасно обнулить)
+            window.__renameTargetLabel = null;
+            window.__currentEditing = null;
+          }
+
+          // Клавиши: Esc — отмена, Enter — сохранить
+          state.keydownHandler = function (e) {
+            if (e.key === 'Escape') {
+              e.preventDefault();
+              finish(false); // отмена
+            } else if (e.key === 'Enter') {
+              e.preventDefault();
+              finish(true); // сохранить
+            }
+          };
+
+          // Клик за пределами — показываем confirm "Вы не закончили действие".
+          // Если пользователь нажмёт OK — возвращаем фокус в поле и предотвращаем действие клика.
+          // Если пользователь нажмёт Отмена — ничего не делаем (клик продолжит своё поведение).
+          state.outsideClickHandler = function (e) {
+            // разрешаем клики внутри текущего label (например, по самим кнопкам этого label)
+            if (state.input.contains(e.target) || state.label.contains(e.target)) return;
+
+            // остановим всплытие чтобы не допустить немедленных побочных эффектов (закрытие меню и т.п.)
+            e.stopPropagation();
+            const ok = confirm('Вы не закончили действие');
+            if (ok) {
+              e.preventDefault();
+              // вернём фокус обратно в input
+              state.input.focus();
+              try { state.input.setSelectionRange(state.input.value.length, state.input.value.length); } catch (err) {}
+            } else {
+              // оставляем редактирование активным, клик выполнится (без вмешательства) —
+              // если нужно, можно отменять редактирование и пр., но в требованиях это не указано.
+            }
+          };
+
+          document.addEventListener('keydown', state.keydownHandler, true);
+          document.addEventListener('click', state.outsideClickHandler, true);
+
+          // не трогаем:
           hideAllMenus();
         });
+
+
 
         menu.appendChild(renameBtn);
         root.appendChild(menu);
@@ -337,12 +483,20 @@
       btn.style.fontSize = "18px";
       btn.style.lineHeight = "1";
       btn.textContent = "⋮";
-
+      // Генерируем уникальный id для каждой кнопки
+      // Используем crypto.randomUUID() если доступен, иначе простой инкремент + случайная часть
+      if (!window.__verticalEllipsisMenu._idCounter) window.__verticalEllipsisMenu._idCounter = 0;
+      const counterPart = ++window.__verticalEllipsisMenu._idCounter;
+      const randomPart = (typeof crypto !== "undefined" && crypto.randomUUID)
+      ? crypto.randomUUID().slice(0, 8)
+      : Math.random().toString(36).slice(2, 8);
+      btn.id = `vertical-ellipsis-btn-${counterPart}-${randomPart}`;
+      
       label.appendChild(btn);
       label.dataset.__ellipsisProcessed = "1";
 
       btn.addEventListener("click", (e) => {
-        simulateClick("#gr_burger")
+        simulateClickById("gr_burger", btn.id)
         e.stopPropagation();
         const menu = getSharedMenu();
         if (menu && menu._visible && menu._anchor === btn) {
@@ -377,5 +531,5 @@
 
     window.addEventListener("beforeunload", () => { hideAllMenus(); });
   })();
-    
+  
 })();

@@ -68,6 +68,7 @@ def new_chat(chat_sessions, chat_titles):
 def switch_chat(title, chat_titles, chat_sessions):
     for t, cid in chat_titles:
         if t == title:
+            print(cid, title)
             return cid, chat_sessions[cid] if cid in chat_sessions else []
     return gr.update(), []
 
@@ -116,3 +117,11 @@ def add_user_message(message, chat_id, chat_sessions, chat_titles):
     return gr.update(value="", autofocus=True), chat_sessions[chat_id], chat_sessions, chat_titles, gr.update(
         choices=choices, value=selected
     )
+
+# Изменение current_chat_id
+def switch_current_chat_id(title, chat_titles):
+    for t, cid in chat_titles:
+        if t == title:
+            print(cid, title)
+            return cid
+    return gr.update(), []
