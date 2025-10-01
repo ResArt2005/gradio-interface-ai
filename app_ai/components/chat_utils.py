@@ -77,6 +77,7 @@ def rename_chat(new_title, current_chat_id, chat_titles):
     if not new_title.strip():
         return gr.update(), gr.update(), ""
     chat_titles = [(new_title if cid == current_chat_id else title, cid) for title, cid in chat_titles]
+    print(current_chat_id, new_title)
     return (
         chat_titles,
         gr.update(choices=[t[0] for t in chat_titles], value=new_title),
@@ -122,6 +123,5 @@ def add_user_message(message, chat_id, chat_sessions, chat_titles):
 def switch_current_chat_id(title, chat_titles):
     for t, cid in chat_titles:
         if t == title:
-            print(cid, title)
             return cid
     return gr.update(), []
