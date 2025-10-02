@@ -49,9 +49,9 @@ def bind_events(components:tuple):
     ).then(focus_textbox, [], [textbox])
     
     # На тестировании
-    burger_btn_gr.click(rename_chat, [chat_list, chat_titles],
-                     [current_chat_id]
-    ).then(focus_textbox, [], [textbox])
+    #burger_btn_gr.click(rename_chat, [rename_box, current_chat_id, chat_titles],
+    #                 [chat_titles, chat_list, rename_box]
+    #).then(focus_textbox, [], [textbox])
 
     rename_btn.click(rename_chat, [rename_box, current_chat_id, chat_titles],
                      [chat_titles, chat_list, rename_box]
