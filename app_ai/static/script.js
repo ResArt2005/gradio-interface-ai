@@ -308,8 +308,9 @@
             if(save){
               const grInput = document.querySelector("#gr_rename_box textarea, #gr_rename_box input");
               grInput.value = state.input.value;
-              //simulateClickById("gr_rename_chat", renameBtn.id);
+              simulateClickById("gr_rename_chat", renameBtn.id);
             }
+            focusMainInput();
           }
 
           state.keydownHandler = function (e) {

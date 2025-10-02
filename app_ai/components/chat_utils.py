@@ -61,6 +61,7 @@ def new_chat(chat_sessions, chat_titles):
         return new_id, chat_sessions, chat_titles, gr.update(choices=[t[0] for t in chat_titles])
     chat_sessions[new_id] = []
     title = f"Новый чат {len(chat_titles) + 1}"
+    print("Создание чата: " + title)
     chat_titles.append((title, new_id))
     return new_id, chat_sessions, chat_titles, gr.update(choices=[t[0] for t in chat_titles], value=title)
 
@@ -68,7 +69,7 @@ def new_chat(chat_sessions, chat_titles):
 def switch_chat(title, chat_titles, chat_sessions):
     for t, cid in chat_titles:
         if t == title:
-            print(cid, title)
+            print("Переключение чата: " + title)
             return cid, chat_sessions[cid] if cid in chat_sessions else []
     return gr.update(), []
 
@@ -76,8 +77,8 @@ def switch_chat(title, chat_titles, chat_sessions):
 def rename_chat(new_title, current_chat_id, chat_titles):
     if not new_title.strip():
         return gr.update(), gr.update(), ""
+    print("Переименование чата: " + new_title)
     chat_titles = [(new_title if cid == current_chat_id else title, cid) for title, cid in chat_titles]
-    print(current_chat_id, new_title)
     return (
         chat_titles,
         gr.update(choices=[t[0] for t in chat_titles], value=new_title),
@@ -118,10 +119,3 @@ def add_user_message(message, chat_id, chat_sessions, chat_titles):
     return gr.update(value="", autofocus=True), chat_sessions[chat_id], chat_sessions, chat_titles, gr.update(
         choices=choices, value=selected
     )
-
-# Изменение current_chat_id
-def switch_current_chat_id(title, chat_titles):
-    for t, cid in chat_titles:
-        if t == title:
-            return cid
-    return gr.update(), []
