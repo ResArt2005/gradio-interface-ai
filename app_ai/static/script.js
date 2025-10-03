@@ -308,6 +308,10 @@
             if(save){
               const grInput = document.querySelector("#gr_rename_box textarea, #gr_rename_box input");
               grInput.value = state.input.value;
+              grInput.dispatchEvent(new Event('input', { bubbles: true }));
+              grInput.dispatchEvent(new Event('change', { bubbles: true }));
+              grInput.focus();
+              grInput.blur();
               simulateClickById("gr_rename_chat", renameBtn.id);
             }
             focusMainInput();

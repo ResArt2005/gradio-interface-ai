@@ -111,7 +111,7 @@ body.resizing-chat {
 }
 
 /* Каждая опция — одна строка: текст слева (обрезается), кнопка справа */
-#chat_list input[type="radio"] + label{
+#chat_list .svelte-1bx8sav{
   display: inline-flex; /* inline-flex + родитель align-items:flex-start даст ширину по контенту */
   align-items: center;
   gap: 8px;
@@ -128,17 +128,17 @@ body.resizing-chat {
 }
 
 /* Ховер/фокус/активная */
-#chat_list input[type="radio"] + label:hover{
-  background:#ECEEF2;
-  border-color:#D9DCE1; 
+#chat_list .svelte-1bx8sav:hover{
+  background:#ECEEF2 !important;
+  border-color:#D9DCE1 !important; 
 }
-#chat_list input[type="radio"]:focus + label{
-  box-shadow:0 0 0 2px rgba(59,130,246,.25) inset;
-  outline:none;
+#chat_list input[type="radio"]:focus + .svelte-1bx8sav{
+  box-shadow:0 0 0 2px rgba(59,130,246,.25) inset !important;
+  outline:none !important;
 }
-#chat_list input[type="radio"]:checked + label{
-  background:#111; color:#fff;
-  border-color:#111;
+#chat_list input[type="radio"]:checked + .svelte-1bx8sav{
+  background:#111; color:#fff !important;
+  border-color:#111 !important;
 }
 
 /* Текстовая часть — одна строка с троеточием */
@@ -155,31 +155,6 @@ body.resizing-chat {
   zIndex: 2147483000;
   pointerEvents: none;
 }
-/*.vertical-ellipsis-menu-shared{
-  position: absolute;
-  pointerEvents: auto;
-  minWidth: 160px;
-  background: #fff;
-  color:#111;
-  borderRadius: 8px;
-  boxShadow: 0 6px 18px rgba(0,0,0,0.12);
-  padding: 6px;
-  fontSize: 13px;
-  transformOrigin: left center;
-  display: none;
-}
-.renameBtn{
-  display: block;
-  width: 100%;
-  textAlign: left;
-  padding: 8px 10px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  borderRadius: 6px;
-}
-.renameBtn:hover{ background: rgba(0,0,0,0.03); }*/
-
 /* Тёмная тема — опционально */
 @media (prefers-color-scheme: dark){
   #chat_list input[type="radio"] + label{ background:#2B2D31; border-color:#3A3D42; color:#E9EAEC; }
@@ -189,6 +164,6 @@ body.resizing-chat {
 }
 
 /* Стили gr элементов */
-#gr_rename_chat, #gr_burger/* , #gr_rename_box*/{
+#gr_rename_chat, #gr_burger, #gr_rename_box{
   display: none!important;
 }

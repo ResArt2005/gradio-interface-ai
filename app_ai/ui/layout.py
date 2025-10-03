@@ -51,7 +51,8 @@ def build_interface():
                     label="Чаты", 
                     interactive=True, 
                     elem_id="chat_list", 
-                    elem_classes="custom-radio"
+                    elem_classes="custom-radio",
+                    value=None
                 )
             with gr.Column(scale=4):
                 chatbot = gr.Chatbot(
