@@ -119,3 +119,40 @@ def add_user_message(message, chat_id, chat_sessions, chat_titles):
     return gr.update(value="", autofocus=True), chat_sessions[chat_id], chat_sessions, chat_titles, gr.update(
         choices=choices, value=selected
     )
+
+# --- Удаление чата ---
+def delete_chat(current_chat_id, chat_sessions, chat_titles):
+    """Удаляет текущий чат"""
+    if not current_chat_id:
+        print("Нет активного чата для удаления")
+        return chat_sessions, chat_titles, gr.update()
+    
+    print(f"Удаление чата: {current_chat_id}")
+    
+    # Удаляем из сессий
+    if current_chat_id in chat_sessions:
+        del chat_sessions[current_chat_id]
+    
+    # Удаляем из заголовков
+    chat_titles = [(title, cid) for title, cid in chat_titles if cid != current_chat_id]
+    
+    # Выбираем новый текущий чат
+    if chat_titles:
+        new_current_id = chat_titles[-1][1]  # Берем последний чат
+        new_choices = [t[0] for t in chat_titles]
+        new_value = chat_titles[-1][0]
+    else:
+        # Если чатов не осталось, создаем новый
+        new_current_id = str(uuid.uuid4())
+        chat_sessions[new_current_id] = []
+        title = "Новый чат 1"
+        chat_titles.append((title, new_current_id))
+        new_choices = [title]
+        new_value = title
+    
+    print(f"Новый текущий чат: {new_current_id}")
+    
+    return new_current_id, chat_sessions, chat_titles, gr.update(
+        choices=new_choices, 
+        value=new_value
+    )

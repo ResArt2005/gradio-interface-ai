@@ -161,7 +161,7 @@
     }
   })();
   //=== Симуляция клика по градио элементу  ===
-  function simulateClickById(id, clickedId) {
+  function simulateClickById(id) {
     const el = document.querySelector("#"+id);
     if (!el) return;
     try {
@@ -169,7 +169,6 @@
     } catch (_) {
       el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
     }
-    el.dataset.clickedId = clickedId;
   }
   // === Скрипт для единого бургер-меню, которое переиспользуется для всех троеточий ===
   (function () {
@@ -240,6 +239,22 @@
         });
         renameBtn.addEventListener("mouseenter", () => renameBtn.style.background = "rgba(0,0,0,0.03)");
         renameBtn.addEventListener("mouseleave", () => renameBtn.style.background = "transparent");
+        const deleteBtn = document.createElement("button");
+        deleteBtn.type = "button";
+        deleteBtn.textContent = "Удалить чат";
+        deleteBtn.id = "delete_chat";
+        Object.assign(deleteBtn.style, {
+          display: "block",
+          width: "100%",
+          textAlign: "left",
+          padding: "8px 10px",
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
+          borderRadius: "6px",
+        });
+        deleteBtn.addEventListener("mouseenter", () => deleteBtn.style.background = "rgba(0,0,0,0.03)");
+        deleteBtn.addEventListener("mouseleave", () => deleteBtn.style.background = "transparent");
         // Запоминаем целевой label при клике на меню
         document.addEventListener('click', (e) => {
           const vBtn = e.target.closest('.vertical-ellipsis-btn');
@@ -312,7 +327,7 @@
               grInput.dispatchEvent(new Event('change', { bubbles: true }));
               grInput.focus();
               grInput.blur();
-              simulateClickById("gr_rename_chat", renameBtn.id);
+              simulateClickById("gr_rename_chat");
             }
             focusMainInput();
           }
@@ -340,7 +355,12 @@
           
           hideAllMenus();
         });
+        deleteBtn.addEventListener("click", () => {
+            simulateClickById("gr_delete_chat");
+            focusMainInput();
+        });
         menu.appendChild(renameBtn);
+        menu.appendChild(deleteBtn);
         root.appendChild(menu);
       }
 
@@ -446,8 +466,17 @@
       label.dataset.__ellipsisProcessed = "1";
 
       btn.addEventListener("click", (e) => {
-        simulateClickById("gr_burger", btn.id)
+        //simulateClickById("gr_burger")
         e.stopPropagation();
+        const label = btn.closest('.svelte-1bx8sav');
+        const radioInput = label.querySelector('input[type="radio"]');
+        if (radioInput) {
+            radioInput.checked = true;
+            
+            // Также можно вызвать события для обновления состояния
+            radioInput.dispatchEvent(new Event('change', { bubbles: true }));
+            radioInput.dispatchEvent(new Event('click', { bubbles: true }));
+        }
         const menu = getSharedMenu();
         if (menu && menu._visible && menu._anchor === btn) {
           hideAllMenus();

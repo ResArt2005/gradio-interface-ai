@@ -164,6 +164,6 @@ body.resizing-chat {
 }
 
 /* Стили gr элементов */
-#gr_rename_chat, #gr_burger, #gr_rename_box{
+#gr_rename_chat, #gr_burger, #gr_rename_box, #gr_delete_chat{
   display: none!important;
 }

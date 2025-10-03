@@ -83,12 +83,14 @@ def build_interface():
         burger_btn_gr = gr.Button(value="gr_test", elem_id="gr_burger")
         # Невидимое поле ввода, куда подставляется новое значение для переименования чата
         rename_box = gr.Textbox(placeholder="Переименовать чат", elem_id="gr_rename_box", lines=1, show_label=False)
+        # Невидимая кнопка удаления чата
+        delete_chat_btn = gr.Button(value="🗑️ Удалить чат", elem_id="gr_delete_chat", variant="stop")
         # --- Events binding ---
         bind_events((
             chip_buttons, textbox, chatbot, clear, new_chat_btn, chat_list,
             rename_btn_gr, rename_box, current_chat_id, chat_sessions,
             chat_titles, top_tree_state, current_nodes, suppress_reset, interface,
-            burger_btn_gr
+            delete_chat_btn
         ))
 
     return interface
