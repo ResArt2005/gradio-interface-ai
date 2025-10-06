@@ -1,3 +1,4 @@
+from typing import Dict
 import gradio as gr
 import uuid
 from pathlib import Path
@@ -37,7 +38,7 @@ def build_interface():
 
         chat_sessions = gr.State({})
         current_chat_id = gr.State(str(uuid.uuid4()))
-        chat_titles = gr.State([])
+        chat_titles: gr.State[Dict[str, str]] = gr.State({})
 
         top_tree_state = gr.State(tree)
         current_nodes = gr.State(tree)

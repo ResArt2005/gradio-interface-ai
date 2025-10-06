@@ -57,48 +57,55 @@ def fetch_llm_answer(_, chat_id, chat_sessions):
 # --- Новый чат ---
 def new_chat(chat_sessions, chat_titles):
     new_id = str(uuid.uuid4())
-    if any(cid == new_id for _, cid in chat_titles):
-        return new_id, chat_sessions, chat_titles, gr.update(choices=[t[0] for t in chat_titles])
+    if new_id in chat_titles:
+        return new_id, chat_sessions, chat_titles, gr.update(choices=list(chat_titles.values()))
+    
     chat_sessions[new_id] = []
     title = f"Новый чат {len(chat_titles) + 1}"
     print("Создание чата: " + title)
-    chat_titles.append((title, new_id))
-    return new_id, chat_sessions, chat_titles, gr.update(choices=[t[0] for t in chat_titles], value=title)
+    chat_titles[new_id] = title
+    return new_id, chat_sessions, chat_titles, gr.update(choices=list(chat_titles.values()), value=title)
 
 # --- Переключение чата ---
 def switch_chat(title, chat_titles, chat_sessions):
-    for t, cid in chat_titles:
+    # Находим chat_id по title
+    for chat_id, t in chat_titles.items():
         if t == title:
             print("Переключение чата: " + title)
-            return cid, chat_sessions[cid] if cid in chat_sessions else []
+            return chat_id, chat_sessions[chat_id] if chat_id in chat_sessions else []
     return gr.update(), []
 
 # --- Переименование чата ---
 def rename_chat(new_title, current_chat_id, chat_titles):
     if not new_title.strip():
         return gr.update(), gr.update(), ""
+    
     print("Переименование чата: " + new_title)
-    chat_titles = [(new_title if cid == current_chat_id else title, cid) for title, cid in chat_titles]
+    chat_titles[current_chat_id] = new_title
+    
     return (
         chat_titles,
-        gr.update(choices=[t[0] for t in chat_titles], value=new_title),
+        gr.update(choices=list(chat_titles.values()), value=new_title),
         ""
     )
 
 # --- Синхронизация чатов ---
 def sync_chat_list(chat_titles, current_chat_id):
-    titles = [t for t, _ in chat_titles]
-    active = next((t for t, cid in chat_titles if cid == current_chat_id), None)
+    titles = list(chat_titles.values())
     if not titles:
         return gr.update(choices=[])
+    
+    active = chat_titles.get(current_chat_id)
     return gr.update(choices=titles, value=active)
 
 # --- Добавление сообщения ---
 def add_user_message(message, chat_id, chat_sessions, chat_titles):
     if chat_id not in chat_sessions:
         chat_sessions[chat_id] = []
+    
+    if chat_id not in chat_titles:
         title = f"Новый чат {len(chat_titles) + 1}"
-        chat_titles.append((title, chat_id))
+        chat_titles[chat_id] = title
 
     user_msg = {"role": "user", "content": format_message("user", message)}
     chat_sessions[chat_id].append(user_msg)
@@ -106,12 +113,11 @@ def add_user_message(message, chat_id, chat_sessions, chat_titles):
     value = None
     if len(chat_sessions[chat_id]) == 1:
         short_title = " ".join(message.strip().split()[:4]) + ("..." if len(message.strip().split()) > 4 else "")
-        chat_titles = [(short_title if cid == chat_id else title, cid) for title, cid in chat_titles]
+        chat_titles[chat_id] = short_title
         value = short_title
 
-    active_title = next((title for title, cid in chat_titles if cid == chat_id), None)
-    choices = [t[0] for t in chat_titles]
-    selected = value or active_title
+    choices = list(chat_titles.values())
+    selected = value or chat_titles.get(chat_id)
 
     if selected not in choices:
         return gr.update(value="", autofocus=True), chat_sessions[chat_id], chat_sessions, chat_titles, gr.update(choices=choices)
@@ -134,19 +140,21 @@ def delete_chat(current_chat_id, chat_sessions, chat_titles):
         del chat_sessions[current_chat_id]
     
     # Удаляем из заголовков
-    chat_titles = [(title, cid) for title, cid in chat_titles if cid != current_chat_id]
+    if current_chat_id in chat_titles:
+        del chat_titles[current_chat_id]
     
     # Выбираем новый текущий чат
     if chat_titles:
-        new_current_id = chat_titles[-1][1]  # Берем последний чат
-        new_choices = [t[0] for t in chat_titles]
-        new_value = chat_titles[-1][0]
+        # Берем последний chat_id и его title
+        new_current_id = list(chat_titles.keys())[-1]
+        new_choices = list(chat_titles.values())
+        new_value = chat_titles[new_current_id]
     else:
         # Если чатов не осталось, создаем новый
         new_current_id = str(uuid.uuid4())
         chat_sessions[new_current_id] = []
         title = "Новый чат 1"
-        chat_titles.append((title, new_current_id))
+        chat_titles[new_current_id] = title
         new_choices = [title]
         new_value = title
     

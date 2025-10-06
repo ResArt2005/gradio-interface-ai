@@ -77,7 +77,7 @@ body.resizing-chat {
 /* Скрыть кнопку "Очистить", но оставить её в DOM */
 #clear_chat { display: none !important; }
 /* Стили для кнопки переименовать */
-#rename_chat {
+#rename_chat, #gr_delete_chat {
   color: white !important;
   background-color: #323ad1 !important;
 }
