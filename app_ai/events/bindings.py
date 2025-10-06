@@ -37,15 +37,23 @@ def bind_events(components:tuple):
     ).then(reset_to_root, [top_tree_state], [*chip_buttons, current_nodes, suppress_reset]
     ).then(focus_textbox, [], [textbox])
 
-    clear.click(clear_current_chat, [current_chat_id, chat_sessions], [chatbot, chat_sessions]
+    clear.click(
+        clear_current_chat, 
+        [current_chat_id, chat_sessions], 
+        [chatbot, chat_sessions]
     ).then(focus_textbox, [], [textbox])
 
-    new_chat_btn.click(new_chat, [chat_sessions, chat_titles],
-                       [current_chat_id, chat_sessions, chat_titles, chat_list]
+    new_chat_btn.click(
+        new_chat, 
+        [chat_sessions, chat_titles],
+        [current_chat_id, chat_sessions, chat_titles, chat_list]
     ).then(focus_textbox, [], [textbox])
 
-    chat_list.change(switch_chat, [chat_list, chat_titles, chat_sessions],
-                     [current_chat_id, chatbot]
+    # --- ВАЖНО: теперь chat_list возвращает chat_id как value ---
+    chat_list.change(
+        switch_chat, 
+        [chat_list, chat_titles, chat_sessions], 
+        [current_chat_id, chatbot]
     ).then(focus_textbox, [], [textbox])
     
     delete_chat_btn.click(
@@ -54,9 +62,14 @@ def bind_events(components:tuple):
         [current_chat_id, chat_sessions, chat_titles, chat_list]
     ).then(focus_textbox, [], [textbox])
 
-    rename_btn.click(rename_chat, [rename_box, current_chat_id, chat_titles],
-                     [chat_titles, chat_list, rename_box]
+    rename_btn.click(
+        rename_chat, 
+        [rename_box, current_chat_id, chat_titles],
+        [chat_titles, chat_list, rename_box]
     ).then(focus_textbox, [], [textbox])
 
-    interface.load(sync_chat_list, [chat_titles, current_chat_id], [chat_list]
+    interface.load(
+        sync_chat_list, 
+        [chat_titles, current_chat_id], 
+        [chat_list]
     ).then(focus_textbox, [], [textbox])
