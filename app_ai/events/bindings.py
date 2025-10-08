@@ -56,16 +56,15 @@ def bind_events(components: tuple):
         [current_chat_id, chatbot]
     ).then(focus_textbox, [], [textbox])
 
-    delete_chat_btn.click(
-        delete_chat,
-        [current_chat_id, chat_sessions, chat_titles],
-        [current_chat_id, chat_sessions, chat_titles, chat_list]
-    ).then(focus_textbox, [], [textbox])
-
     rename_btn.click(
         rename_chat,
         [rename_box, current_chat_id, chat_titles],
         [chat_titles, chat_list, rename_box]
+    ).then(focus_textbox, [], [textbox])
+    rename_btn.click(
+        rename_chat,
+        [rename_box, current_chat_id, chat_titles],
+        [rename_box]
     ).then(focus_textbox, [], [textbox])
 
     interface.load(

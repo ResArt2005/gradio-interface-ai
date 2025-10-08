@@ -86,14 +86,13 @@ def switch_chat(chat_id, chat_titles, chat_sessions):
 def rename_chat(new_title, current_chat_id, chat_titles):
     if not new_title.strip() or current_chat_id not in chat_titles:
         return gr.update(), gr.update(), ""
-    
+    print(f"Чат {chat_titles[current_chat_id]} переименован в {new_title}")
     chat_titles[current_chat_id] = new_title
     return (
     chat_titles,
     gr.update(choices=build_choices(chat_titles), value=current_chat_id, interactive=True),
     ""
     )
-
 
 # --- Синхронизация списка чатов ---
 def sync_chat_list(chat_titles, current_chat_id):
