@@ -54,21 +54,23 @@ def fetch_llm_answer(_, chat_id, chat_sessions):
     chat_sessions[chat_id].append({'role': 'assistant', 'content': formatted})
     return chat_sessions[chat_id], chat_sessions
 
-#Функция утилита для обновления списка
-def build_choices(chat_titles):
+# --- Утилита для построения списка кортежей (label, value) ---
+def build_choices(chat_titles: dict):
     return [(title, chat_id) for chat_id, title in chat_titles.items()]
 
 # --- Новый чат ---
 def new_chat(chat_sessions, chat_titles):
     new_id = str(uuid.uuid4())
-    if new_id in chat_titles:
-        return new_id, chat_sessions, chat_titles, gr.update(choices=build_choices(chat_titles))
-    
     chat_sessions[new_id] = []
-    title = f"Новый чат {len(chat_titles) + 1}"
-    print("Создание чата: " + title)
-    chat_titles[new_id] = title
-    
+
+    # Уникальное название
+    base_name = "Новый чат"
+    i = 1
+    existing_titles = set(chat_titles.values())
+    while f"{base_name} {i}" in existing_titles:
+        i += 1
+    chat_titles[new_id] = f"{base_name} {i}"
+
     return new_id, chat_sessions, chat_titles, gr.update(
         choices=build_choices(chat_titles),
         value=new_id
@@ -77,46 +79,35 @@ def new_chat(chat_sessions, chat_titles):
 # --- Переключение чата ---
 def switch_chat(chat_id, chat_titles, chat_sessions):
     if chat_id in chat_sessions:
-        print("Переключение чата:", chat_titles.get(chat_id, chat_id))
         return chat_id, chat_sessions[chat_id]
     return gr.update(), []
 
 # --- Переименование чата ---
 def rename_chat(new_title, current_chat_id, chat_titles):
-    if not new_title.strip():
+    if not new_title.strip() or current_chat_id not in chat_titles:
         return gr.update(), gr.update(), ""
     
-    print(f"Переименование чата: {chat_titles[current_chat_id]} -> {new_title}")
     chat_titles[current_chat_id] = new_title
-    
     return (
-        chat_titles,
-        gr.update(choices=build_choices(chat_titles), value=current_chat_id),
-        ""
+    chat_titles,
+    gr.update(choices=build_choices(chat_titles), value=current_chat_id, interactive=True),
+    ""
     )
 
 
-# --- Синхронизация чатов ---
+# --- Синхронизация списка чатов ---
 def sync_chat_list(chat_titles, current_chat_id):
     if not chat_titles:
         return gr.update(choices=[])
     return gr.update(choices=build_choices(chat_titles), value=current_chat_id)
 
-
 # --- Добавление сообщения ---
 def add_user_message(message, chat_id, chat_sessions, chat_titles):
     if chat_id not in chat_sessions:
         chat_sessions[chat_id] = []
-    
-    if chat_id not in chat_titles:
-        chat_titles[chat_id] = f"Новый чат {len(chat_titles) + 1}"
 
-    user_msg = {"role": "user", "content": format_message("user", message)}
+    user_msg = {"role": "user", "content": message}
     chat_sessions[chat_id].append(user_msg)
-
-    #if len(chat_sessions[chat_id]) == 1:
-    #    short_title = " ".join(message.strip().split()[:4]) + ("..." if len(message.strip().split()) > 4 else "")
-    #    chat_titles[chat_id] = short_title
 
     return (
         gr.update(value="", autofocus=True),
@@ -129,17 +120,13 @@ def add_user_message(message, chat_id, chat_sessions, chat_titles):
 # --- Удаление чата ---
 def delete_chat(current_chat_id, chat_sessions, chat_titles):
     if not current_chat_id:
-        print("Нет активного чата для удаления")
-        return chat_sessions, chat_titles, gr.update()
-    
-    print(f"Удаление чата: {chat_titles[current_chat_id]}")
-    
+        return gr.update(), chat_sessions, chat_titles, gr.update()
+
     chat_sessions.pop(current_chat_id, None)
     chat_titles.pop(current_chat_id, None)
-    
-    if chat_titles:
-        new_current_id = list(chat_titles.keys())[-1]
-    
+
+    new_current_id = next(reversed(chat_titles), None)
+
     return new_current_id, chat_sessions, chat_titles, gr.update(
         choices=build_choices(chat_titles),
         value=new_current_id
