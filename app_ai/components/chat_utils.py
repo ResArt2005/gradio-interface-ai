@@ -120,13 +120,11 @@ def add_user_message(message, chat_id, chat_sessions, chat_titles):
 def delete_chat(current_chat_id, chat_sessions, chat_titles):
     if not current_chat_id:
         return gr.update(), chat_sessions, chat_titles, gr.update()
-
+    print(f"Чат {chat_titles[current_chat_id]} удалён.")
     chat_sessions.pop(current_chat_id, None)
-    chat_titles.pop(current_chat_id, None)
-
-    new_current_id = next(reversed(chat_titles), None)
-
+    chat_titles.pop(current_chat_id, None) # Новый текущий чат: последний в словаре
+    new_current_id = next(iter(chat_titles), None)
     return new_current_id, chat_sessions, chat_titles, gr.update(
         choices=build_choices(chat_titles),
         value=new_current_id
-    )
+        )
