@@ -311,18 +311,45 @@
 
           const state = { label, span, input, originalText };
           window.__currentEditing = state;
+          function truncateText(text) {
+            if (text.length > 50) {
+              return text.substring(0, 47) + '...';
+            }
+            return text;
+          }
+          function validateAndFinish(save) {
+            // Проверка на пустое название или название из пробелов
+            if (save && (!state.input.value.trim() || state.input.value.trim() === '')) {
+              const shouldContinue = confirm('Пустое название\n\nВы хотите продолжить редактирование?');
+              if (shouldContinue) {
+                // Пользователь нажал "OK" - возвращаем к редактированию
+                state.input.focus();
+                state.input.setSelectionRange(0, state.input.value.length);
+                return false; // не завершаем редактирование
+              } else {
+                // Пользователь нажал "Отмена" - отменяем редактирование
+                finish(false);
+                return true; // завершаем редактирование
+              }
+            }
+            
+            // Если проверка пройдена или save=false, завершаем редактирование
+            finish(save);
+            return true;
+          }
 
           function finish(save) {
             document.removeEventListener('keydown', state.keydownHandler, true);
-            document.removeEventListener('click', state.outsideClickHandler, true);
-            //state.span.textContent = save ? state.input.value : state.originalText;
+            document.removeEventListener('click', state.outsideClickHandler, true);            
             state.input.remove();
             state.span.style.display = '';
             window.__renameTargetLabel = null;
             window.__currentEditing = null;
+            
             if(save){
+              const finalText = truncateText(state.input.value.trim());
               const grInput = document.querySelector("#gr_rename_box textarea, #gr_rename_box input");
-              grInput.value = state.input.value;
+              grInput.value = finalText;
               grInput.dispatchEvent(new Event('input', { bubbles: true }));
               grInput.dispatchEvent(new Event('change', { bubbles: true }));
               grInput.focus();
@@ -333,8 +360,14 @@
           }
 
           state.keydownHandler = function (e) {
-            if (e.key === 'Escape') { e.preventDefault(); finish(false); }
-            if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+            if (e.key === 'Escape') { 
+              e.preventDefault(); 
+              finish(false); 
+            }
+            if (e.key === 'Enter') { 
+              e.preventDefault(); 
+              validateAndFinish(true); 
+            }
           };
 
           state.outsideClickHandler = function (e) {
@@ -346,7 +379,7 @@
               state.input.focus();
               state.input.setSelectionRange(state.input.value.length, state.input.value.length);
             } else {
-              finish(false); // теперь Cancel сразу завершает редактирование
+              finish(false);
             }
           };
 

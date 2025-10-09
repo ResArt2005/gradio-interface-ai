@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 import os
 import uuid
 from pathlib import Path
-
+from tools.debug import logger
 FASTAPI_URL = "http://host.docker.internal:8000/query"
 
 # --- Форматирование сообщений ---
@@ -71,6 +71,8 @@ def new_chat(chat_sessions, chat_titles):
         i += 1
     chat_titles[new_id] = f"{base_name} {i}"
 
+    logger.success(f"создан новый чат {chat_titles[new_id]} {new_id}")
+
     return new_id, chat_sessions, chat_titles, gr.update(
         choices=build_choices(chat_titles),
         value=new_id
@@ -79,14 +81,16 @@ def new_chat(chat_sessions, chat_titles):
 # --- Переключение чата ---
 def switch_chat(chat_id, chat_titles, chat_sessions):
     if chat_id in chat_sessions:
+        logger.success(f"Переключение на чат {chat_titles[chat_id]} {chat_id}")
         return chat_id, chat_sessions[chat_id]
+    logger.error(f"Чат с ID {chat_id} не найден!")
     return gr.update(), []
 
 # --- Переименование чата ---
 def rename_chat(new_title, current_chat_id, chat_titles):
     if not new_title.strip() or current_chat_id not in chat_titles:
         return gr.update(), gr.update(), ""
-    print(f"Чат {chat_titles[current_chat_id]} переименован в {new_title}")
+    logger.success(f"Чат {chat_titles[current_chat_id]} {current_chat_id} переименован в {new_title}")
     chat_titles[current_chat_id] = new_title
     return (
     chat_titles,
@@ -108,6 +112,9 @@ def add_user_message(message, chat_id, chat_sessions, chat_titles):
     user_msg = {"role": "user", "content": message}
     chat_sessions[chat_id].append(user_msg)
 
+    logger.info(f"Сообщение от пользователя {message}")
+    logger.info(f"Текущий чат {chat_titles[chat_id]} {chat_id}")
+
     return (
         gr.update(value="", autofocus=True),
         chat_sessions[chat_id],
@@ -120,10 +127,15 @@ def add_user_message(message, chat_id, chat_sessions, chat_titles):
 def delete_chat(current_chat_id, chat_sessions, chat_titles):
     if not current_chat_id:
         return gr.update(), chat_sessions, chat_titles, gr.update()
-    print(f"Чат {chat_titles[current_chat_id]} удалён.")
+    
+    logger.success(f"Чат успешно {chat_titles[current_chat_id]} {current_chat_id} удалён.")
+
     chat_sessions.pop(current_chat_id, None)
     chat_titles.pop(current_chat_id, None) # Новый текущий чат: последний в словаре
     new_current_id = next(iter(chat_titles), None)
+    
+    logger.info(f"Переключение на чат {chat_titles[new_current_id]} {new_current_id}.")
+
     return new_current_id, chat_sessions, chat_titles, gr.update(
         choices=build_choices(chat_titles),
         value=new_current_id
