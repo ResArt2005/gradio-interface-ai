@@ -67,11 +67,6 @@ def bind_events(components: tuple):
         [rename_box, current_chat_id, chat_titles],
         [chat_titles, chat_list, rename_box]
     ).then(focus_textbox, [], [textbox])
-    rename_btn.click(
-        rename_chat,
-        [rename_box, current_chat_id, chat_titles],
-        [rename_box]
-    ).then(focus_textbox, [], [textbox])
 
     interface.load(
         sync_chat_list,

@@ -164,8 +164,8 @@
   function simulateClickById(id) {
     const el = document.querySelector("#"+id);
     if (!el) return;
+    el.click();
     try {
-      el.click();
     } catch (_) {
       el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
     }
@@ -315,7 +315,7 @@
           function finish(save) {
             document.removeEventListener('keydown', state.keydownHandler, true);
             document.removeEventListener('click', state.outsideClickHandler, true);
-            state.span.textContent = save ? state.input.value : state.originalText;
+            //state.span.textContent = save ? state.input.value : state.originalText;
             state.input.remove();
             state.span.style.display = '';
             window.__renameTargetLabel = null;

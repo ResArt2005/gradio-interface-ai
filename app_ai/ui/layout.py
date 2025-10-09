@@ -80,8 +80,6 @@ def build_interface():
 
         #Невидимые элементы градио для кнтренней логики
         rename_btn_gr = gr.Button(value="gr_test", elem_id="gr_rename_chat")
-        #Должен изменять current_chat_id
-        burger_btn_gr = gr.Button(value="gr_test", elem_id="gr_burger")
         # Невидимое поле ввода, куда подставляется новое значение для переименования чата
         rename_box = gr.Textbox(placeholder="Переименовать чат", elem_id="gr_rename_box", lines=1, show_label=False)
         # Невидимая кнопка удаления чата
