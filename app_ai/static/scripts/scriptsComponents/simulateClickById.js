@@ -1,4 +1,5 @@
 console.log("simulateClickById.js загружен");
+//=== Симуляция клика по градио элементу  ===
 function setSimulateClickById(){
     function simulateClickById(id) {
         const el = document.querySelector("#"+id);

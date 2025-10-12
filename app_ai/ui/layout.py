@@ -12,9 +12,17 @@ custom_head = f"""
 <script type="text/javascript">
 window.addEventListener('load', function () {{
     (function () {{
+        //Блоки по умолчанию
+        {customResizable_js}
         {simulateClickById_js}
         {fucusInput_js}
+        //Напрямую влияющие на разметку
+        // == Бургер меню и его компоненты ==
         {ranameBtn_js}
+        {deleteBtn_js}
+        {burgerMenu_js}
+        // == Другое ==
+        //Связующий блок, который заставляет работать остальные js скрипты
         {script_js}
     }})();
 }});

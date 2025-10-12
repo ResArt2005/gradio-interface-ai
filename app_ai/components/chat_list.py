@@ -30,14 +30,14 @@ def switch_chat(chat_id, chat_titles, chat_sessions):
     if chat_id in chat_sessions:
         logger.info(f"Переключение на чат {chat_titles[chat_id]} {chat_id}")
         return chat_id, chat_sessions[chat_id]
-    logger.error(f"Чат с ID {chat_id} не найден!")
+    logger.warning(f"Чат с ID {chat_id} не найден!")
     return gr.update(), []
 
 # --- Переименование чата ---
 def rename_chat(new_title, current_chat_id, chat_titles):
     if not new_title.strip() or current_chat_id not in chat_titles:
         return gr.update(), gr.update(), ""
-    logger.info(f"Чат {chat_titles[current_chat_id]} {current_chat_id} переименован в {new_title}")
+    logger.info(f"Переименован чат из {chat_titles[current_chat_id]} {current_chat_id} в {new_title}")
     chat_titles[current_chat_id] = new_title
     return (
     chat_titles,
@@ -53,15 +53,20 @@ def sync_chat_list(chat_titles, current_chat_id):
 
 # --- Добавление сообщения ---
 def add_user_message(message, chat_id, chat_sessions, chat_titles):
-    if chat_id not in chat_sessions:
+    # Если чатов не осталось, создаем новый чат с автоматическим названием
+    if not chat_sessions or chat_id not in chat_sessions:
+        # Генерируем новый ID для чата
+        chat_id = str(uuid.uuid4())
+        # Создаем название чата из первых 50 символов сообщения
+        chat_title = message[:50] + "..." if len(message) > 50 else message
+        chat_titles[chat_id] = chat_title
         chat_sessions[chat_id] = []
-
+        logger.info(f"Создан новый чат: {chat_title} {chat_id}")
+    # Добавляем сообщение пользователя
     user_msg = {"role": "user", "content": message}
     chat_sessions[chat_id].append(user_msg)
-
     logger.info(f"Сообщение от пользователя: {message}")
     logger.info(f"Текущий чат {chat_titles[chat_id]} {chat_id}")
-
     return (
         gr.update(value="", autofocus=True),
         chat_sessions[chat_id],
@@ -74,16 +79,21 @@ def add_user_message(message, chat_id, chat_sessions, chat_titles):
 def delete_chat(current_chat_id, chat_sessions, chat_titles):
     if not current_chat_id:
         return gr.update(), chat_sessions, chat_titles, gr.update()
-    
-    logger.success(f"Чат {chat_titles[current_chat_id]} {current_chat_id} успешно удалён.")
-
+    logger.success(f"Удаление чата {chat_titles[current_chat_id]} {current_chat_id}.")
     chat_sessions.pop(current_chat_id, None)
-    chat_titles.pop(current_chat_id, None) # Новый текущий чат: последний в словаре
-    new_current_id = next(iter(chat_titles), None)
-    
-    logger.info(f"Переключение на чат {chat_titles[new_current_id]} {new_current_id}.")
+    chat_titles.pop(current_chat_id, None)
+    # Новый текущий чат: последний в словаре (если есть)
+    new_current_id = next(iter(chat_titles), None) if chat_titles else None
+    if new_current_id:
+        logger.info(f"Переключение на чат {chat_titles[new_current_id]} {new_current_id}.")
+        choices = build_choices(chat_titles)
+        value = new_current_id
+    else:
+        logger.info("Все чаты удалены. Создайте новый чат.")
+        choices = []
+        value = None
 
     return new_current_id, chat_sessions, chat_titles, gr.update(
-        choices=build_choices(chat_titles),
-        value=new_current_id
-        )
+        choices=choices,
+        value=value
+    )
