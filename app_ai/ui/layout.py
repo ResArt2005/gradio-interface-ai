@@ -1,32 +1,21 @@
 from typing import Dict
 import gradio as gr
 import uuid
-from pathlib import Path
 from tools.fast_prompt_script import tree
 from events.events import MAX_BUTTONS
 from events.bindings import bind_events
-BASE_DIR = Path(__file__).parent.parent
-
-try:
-    with open(BASE_DIR / "static/styles.css", "r", encoding="utf-8") as f:
-        CUSTOM_CSS = f.read()
-except FileNotFoundError:
-    CUSTOM_CSS = ""
-
-try:
-    with open(BASE_DIR / "static/script.js", "r", encoding="utf-8") as f:
-        CUSTOM_JS = f.read()
-except FileNotFoundError:
-    CUSTOM_JS = ""
-
+from static.load_static import *
 custom_head = f"""
 <style>
-{CUSTOM_CSS}
+{styles_css}
 </style>
 <script type="text/javascript">
 window.addEventListener('load', function () {{
     (function () {{
-        {CUSTOM_JS}
+        {simulateClickById_js}
+        {fucusInput_js}
+        {ranameBtn_js}
+        {script_js}
     }})();
 }});
 </script>
