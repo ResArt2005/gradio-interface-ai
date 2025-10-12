@@ -292,7 +292,7 @@ class SimpleLogger:
 
 # Глобальные настройки
 DEBUG = True
-LOG_OUTPUT = "file"  # console/file
+LOG_OUTPUT = "console"  # console/file
 JSON_FORMAT = False     # True для JSON формата
 
 # Создание глобального экземпляра логгера

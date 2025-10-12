@@ -3,7 +3,7 @@ import gradio as gr
 import uuid
 from pathlib import Path
 from tools.fast_prompt_script import tree
-from events import events
+from events.events import MAX_BUTTONS
 from events.bindings import bind_events
 BASE_DIR = Path(__file__).parent.parent
 
@@ -62,7 +62,7 @@ def build_interface():
 
                 with gr.Row(elem_id="chips_row"):
                     chip_buttons = []
-                    for i in range(events.MAX_BUTTONS):
+                    for i in range(MAX_BUTTONS):
                         if i < len(tree):
                             lbl = tree[i]["name"]
                             visible = True

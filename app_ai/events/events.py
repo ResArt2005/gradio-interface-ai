@@ -1,7 +1,10 @@
 from components.chat_utils import (
-    clear_current_chat, fetch_llm_answer, new_chat, switch_chat, rename_chat, format_message, sync_chat_list, add_user_message,
-    delete_chat
+    clear_current_chat, format_message, fetch_llm_answer
 )
 from components.prompt_tree import (
     chip_click, on_textbox_change, reset_to_root, MAX_BUTTONS
+)
+from components.chat_list import(
+    new_chat, switch_chat, rename_chat, sync_chat_list, add_user_message,
+    delete_chat
 )
