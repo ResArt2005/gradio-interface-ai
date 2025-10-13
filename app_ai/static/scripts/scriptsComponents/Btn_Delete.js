@@ -1,5 +1,5 @@
 console.log("deleteBtn.js загружен");
-function setDeleteBtn(){
+function set_Btn_Delete(){
     const deleteBtn = document.createElement("button");
         
         deleteBtn.type = "button";

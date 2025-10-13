@@ -18,8 +18,8 @@ styles_css = load_file("static/styles/styles.css")
 # init
 script_js = load_file("static/scripts/init/script.js")
 # scriptsComponents
-ranameBtn_js = load_file("static/scripts/scriptsComponents/renameBtn.js")
-deleteBtn_js = load_file("static/scripts/scriptsComponents/deleteBtn.js")
+Btn_Rename_js = load_file("static/scripts/scriptsComponents/Btn_Rename.js")
+Btn_Delete_js = load_file("static/scripts/scriptsComponents/Btn_Delete.js")
 simulateClickById_js = load_file("static/scripts/scriptsComponents/simulateClickById.js")
 # global
 fucusInput_js = load_file("static/scripts/global/focusInput.js")

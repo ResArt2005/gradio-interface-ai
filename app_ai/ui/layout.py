@@ -18,8 +18,8 @@ window.addEventListener('load', function () {{
         {fucusInput_js}
         //Напрямую влияющие на разметку
         // == Бургер меню и его компоненты ==
-        {ranameBtn_js}
-        {deleteBtn_js}
+        {Btn_Rename_js}
+        {Btn_Delete_js}
         {burgerMenu_js}
         // == Другое ==
         //Связующий блок, который заставляет работать остальные js скрипты

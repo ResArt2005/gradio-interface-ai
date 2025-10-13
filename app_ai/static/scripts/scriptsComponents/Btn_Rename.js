@@ -1,5 +1,5 @@
 console.log("renameBtn.js загружен");
-function setRenameBtn(){
+function set_Btn_Rename(){
         // Переименовать чат
         const renameBtn = document.createElement("button");
         renameBtn.type = "button";

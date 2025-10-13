@@ -1,8 +1,8 @@
 console.log("burgerMenu.js загружен");
 function setBurgerMenu(){
   simulateClickById = setSimulateClickById();
-  const renameBtn = setRenameBtn();
-  const deleteBtn = setDeleteBtn();
+  const Btn_Rename = set_Btn_Rename();
+  const Btn_Delete = set_Btn_Delete();
   // === Скрипт для единого бургер-меню, которое переиспользуется для всех троеточий ===
   (function () {
     // Глобальный синглтон, чтобы защититься от повторного монтирования при двойной вставке скрипта
@@ -54,8 +54,8 @@ function setBurgerMenu(){
           transformOrigin: "left center",
           display: "none",
         });
-        menu.appendChild(renameBtn);
-        menu.appendChild(deleteBtn);
+        menu.appendChild(Btn_Rename);
+        menu.appendChild(Btn_Delete);
         root.appendChild(menu);
       }
 
