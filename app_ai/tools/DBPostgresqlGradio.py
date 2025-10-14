@@ -78,27 +78,79 @@ class DBPostgresqlGradio:
         """
         Извлекает дерево из таблицы tree_nodes и возвращает его в виде JSON:
         только {"name": ..., "children": [...]} без id и parent_id.
+        Рекурсивно строит дерево любой глубины.
         """
         sql = """
-        SELECT id, name, parent_id
-        FROM prompt_tree
-        ORDER BY id;
+        WITH RECURSIVE tree_paths AS (
+            -- Корневые узлы
+            SELECT 
+                id,
+                name,
+                parent_id,
+                ARRAY[id] as path,
+                1 as level
+            FROM prompt_tree 
+            WHERE parent_id IS NULL
+            
+            UNION ALL
+            
+            -- Дочерние узлы
+            SELECT 
+                t.id,
+                t.name,
+                t.parent_id,
+                tp.path || t.id,
+                tp.level + 1
+            FROM prompt_tree t
+            JOIN tree_paths tp ON t.parent_id = tp.id
+        )
+        SELECT 
+            id,
+            name,
+            parent_id,
+            path,
+            level
+        FROM tree_paths
+        ORDER BY path;
         """
+        
         nodes = self.select_as_dict(sql)
-
-        # Создаем словарь всех узлов {id: {"name": ..., "children": []}}
-        node_map = {n["id"]: {"name": n["name"], "children": []} for n in nodes}
-
-        # Собираем дерево
-        for n in nodes:
-            parent_id = n["parent_id"]
-            if parent_id:
-                # Добавляем текущий узел в children родителя
-                node_map[parent_id]["children"].append(node_map[n["id"]])
-
-        # Корневые узлы — это те, у которых parent_id is None
-        root_nodes = [node_map[n["id"]] for n in nodes if n["parent_id"] is None]
-
+        
+        # Создаем словарь для быстрого доступа к узлам по id
+        node_map = {}
+        for node in nodes:
+            node_map[node['id']] = {
+                'name': node['name'],
+                'children': [],
+                'level': node['level']
+            }
+        
+        # Сортируем узлы по уровню (от самого глубокого к корневому)
+        # чтобы гарантировать, что дочерние узлы будут добавлены перед родительскими
+        sorted_nodes = sorted(nodes, key=lambda x: x['level'], reverse=True)
+        
+        # Строим дерево снизу вверх
+        root_nodes = []
+        for node in sorted_nodes:
+            current_node = node_map[node['id']]
+            
+            if node['parent_id'] is None:
+                # Это корневой узел
+                root_nodes.append({
+                    'name': current_node['name'],
+                    'children': current_node['children']
+                })
+            else:
+                # Это дочерний узел - добавляем его к родителю
+                parent_node = node_map.get(node['parent_id'])
+                if parent_node:
+                    parent_node['children'].append({
+                        'name': current_node['name'],
+                        'children': current_node['children']
+                    })
+        
+        # Корневые узлы должны быть в правильном порядке
+        root_nodes.reverse()
         return root_nodes
 
     # ===============================================================
@@ -109,6 +161,7 @@ class DBPostgresqlGradio:
         """
         Загружает JSON дерево в таблицу prompt_tree.
         Пример: db.load_json_to_tree('data/tree.json')
+        Рекурсивно обрабатывает дерево любой глубины.
         """
         json_path = self.BASE_DIR / relative_json_path
         if not json_path.exists():
@@ -128,12 +181,18 @@ class DBPostgresqlGradio:
 
         def insert_children(conn, items, parent_id=None):
             for item in items:
+                # Вставляем текущий узел
                 node_id = insert_node(conn, item["name"], parent_id)
-                if item.get("children"):
+                
+                # Рекурсивно вставляем детей, если они есть
+                if "children" in item and item["children"]:
                     insert_children(conn, item["children"], node_id)
 
         try:
+            # Очищаем таблицу перед загрузкой нового дерева
             with self.engine.begin() as conn:
+                conn.execute(text("TRUNCATE TABLE prompt_tree RESTART IDENTITY CASCADE;"))
+                # Вставляем новое дерево
                 insert_children(conn, data)
             logger.success(f"JSON дерево успешно загружено из {relative_json_path}")
         except SQLAlchemyError as e:
@@ -156,6 +215,7 @@ except Exception as e:
     logger.error(f"Неизвестная ошибка: {e}")
     db = None
 
+# Инициализация таблицы и загрузка данных
 #db.execute_sql_file("sql/create_prompt_tree.sql")
 #db.load_json_to_tree("json/prompt_tree.json")
 #print(db.get_tree_as_json())

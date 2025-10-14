@@ -57,7 +57,7 @@ def add_user_message(message, chat_id, chat_sessions, chat_titles):
     # Если чатов нет, создаем новый чат с тем же chat_id
     if chat_id not in chat_sessions:
         chat_sessions[chat_id] = []
-        chat_title = message[:50] + "..." if len(message) > 50 else message
+        chat_title = message[:30] + "..." if len(message) > 30 else message
         chat_titles[chat_id] = chat_title
         logger.info(f"Создан новый чат: {chat_title} {chat_id}")
     
