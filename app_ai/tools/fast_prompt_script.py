@@ -1,6 +1,6 @@
 from pathlib import Path
 import json
-
+from tools.DBPostgresqlGradio import db
 def parse_hierarchy(lines:list[str])->list[dict[str, any]]:
     """
     Парсит список строк в иерархическую структуру списка словарей.
@@ -46,3 +46,5 @@ try:
     print(json.dumps(tree, ensure_ascii=False, indent=4))
 except FileNotFoundError:
     print("⚠️  Файл с быстрыми запросами не найден")
+
+print(db.get_tree_as_json())

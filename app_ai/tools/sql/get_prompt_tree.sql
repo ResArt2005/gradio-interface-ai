@@ -1,4 +1,4 @@
-WITH RECURSIVE tree AS (
+WITH RECURSIVE public.tree AS (
     SELECT id, name, parent_id, 1 AS depth
     FROM tree_nodes
     WHERE parent_id IS NULL

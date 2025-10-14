@@ -51,28 +51,7 @@ def sync_chat_list(chat_titles, current_chat_id):
     if not chat_titles:
         return gr.update(choices=[])
     return gr.update(choices=build_choices(chat_titles), value=current_chat_id)
-'''
-def add_user_message(message, chat_id, chat_sessions, chat_titles):
-    if chat_id not in chat_sessions:
-        chat_sessions[chat_id] = []
-        title = f"Новый чат {len(chat_titles) + 1}"
-        chat_titles.append((title, chat_id))
 
-    user_msg = {"role": "user", "content": format_message("user", message)}
-    chat_sessions[chat_id].append(user_msg)
-
-    value = None
-    if len(chat_sessions[chat_id]) == 1:
-        short_title = " ".join(message.strip().split()[:4]) + ("..." if len(message.strip().split()) > 4 else "")
-        chat_titles = [(short_title if cid == chat_id else title, cid) for title, cid in chat_titles]
-        value = short_title
-
-    active_title = next((title for title, cid in chat_titles if cid == chat_id), None)
-    return "", chat_sessions[chat_id], chat_sessions, chat_titles, gr.update(
-        choices=[t[0] for t in chat_titles],
-        value=value or active_title
-    )
-'''
 # --- Добавление сообщения ---
 def add_user_message(message, chat_id, chat_sessions, chat_titles):
     # Если чатов нет, создаем новый чат с тем же chat_id

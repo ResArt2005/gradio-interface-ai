@@ -1,6 +1,6 @@
-CREATE TABLE IF NOT EXIST prompt_tree (
+CREATE TABLE IF NOT EXISTS public.prompt_tree (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
-    parent_id INT REFERENCES tree_nodes(id) ON DELETE CASCADE,
+    parent_id INT REFERENCES prompt_tree(id) ON DELETE CASCADE,
     metadata JSONB DEFAULT '{}'::jsonb
 );
