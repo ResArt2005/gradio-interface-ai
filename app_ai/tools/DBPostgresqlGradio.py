@@ -2,6 +2,7 @@ from sqlalchemy import create_engine, text
 import pandas as pd
 import io
 from config.config import Config
+from sqlalchemy.exc import SQLAlchemyError
 from tools.debug import logger
 class DBPostgresqlGradio:
     """sqlalchemy, psycopg[binary] - MIT License"""
@@ -51,7 +52,6 @@ class DBPostgresqlGradio:
         """
         df.to_sql(table, self.engine, schema=schema, if_exists="append", index=False, method="multi")
 
-from sqlalchemy.exc import SQLAlchemyError
 
 try:
     db = DBPostgresqlGradio(
