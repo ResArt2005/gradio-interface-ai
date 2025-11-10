@@ -1,11 +1,28 @@
 version: '3.8'
 
 services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: gradioBD
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   gradio-app:
     build: .
     ports:
       - "7681:7680"
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/gradioBD
     volumes:
       - ./logs:/app/logs
-      - .:/app
     restart: unless-stopped
+
+volumes:
+  postgres_data:
