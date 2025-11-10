@@ -89,7 +89,7 @@ class DBPostgresqlGradio:
                 parent_id,
                 ARRAY[id] as path,
                 1 as level
-            FROM prompt_tree 
+            FROM public.prompt_tree 
             WHERE parent_id IS NULL
             
             UNION ALL
@@ -101,7 +101,7 @@ class DBPostgresqlGradio:
                 t.parent_id,
                 tp.path || t.id,
                 tp.level + 1
-            FROM prompt_tree t
+            FROM public.prompt_tree t
             JOIN tree_paths tp ON t.parent_id = tp.id
         )
         SELECT 
