@@ -15,7 +15,7 @@ services:
   gradio-app:
     build: .
     ports:
-      - "7681:7680"
+      - "7861:7860"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
