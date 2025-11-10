@@ -16,6 +16,8 @@ services:
     build: .
     ports:
       - "7681:7680"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - postgres
     environment:
