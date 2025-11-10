@@ -1,0 +1,6 @@
+# Только Docker
+docker build -t gradio-app .
+docker run -p 7681:7680 gradio-app
+
+# Или с Docker Compose
+docker-compose up -d
