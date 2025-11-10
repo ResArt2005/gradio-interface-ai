@@ -73,7 +73,14 @@ class DBPostgresqlGradio:
     # ===============================================================
     # 🔹 2. РЕКУРСИВНОЕ ИЗВЛЕЧЕНИЕ ДЕРЕВА
     # ===============================================================
-
+    def check_tables(self):
+        sql = """
+        SELECT table_name 
+        FROM information_schema.tables 
+        WHERE table_schema = 'public'
+        """
+        tables = self.select_as_dict(sql)
+        logger.info(f"Таблицы в БД: {[t['table_name'] for t in tables]}")
     def get_tree_as_json(self):
         """
         Извлекает дерево из таблицы tree_nodes и возвращает его в виде JSON:
@@ -208,6 +215,7 @@ try:
         Config.DB_PORT
     )
     logger.success("Подключение к PostgreSQL успешно установлено.")
+    db.check_tables()
 except SQLAlchemyError as e:
     logger.error(f"Ошибка SQLAlchemy: {e}")
     db = None
