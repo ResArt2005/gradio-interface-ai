@@ -1,8 +1,10 @@
-version: '3.8'
+version: "3.9"
 
 services:
-  postgres:
-    image: postgres:13
+  db:
+    image: postgres:15
+    container_name: pgdb
+    restart: always
     environment:
       POSTGRES_DB: gradioBD
       POSTGRES_USER: postgres
@@ -12,19 +14,23 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  gradio-app:
-    build: .
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gradio_app
+    restart: always
     ports:
-      - "7861:7860"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - "7860:7860"
     depends_on:
-      - postgres
+      - db
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/gradioBD
+      DB_HOST: db
+      DB_NAME: gradioBD
+      DB_USER: postgres
+      DB_PASSWORD: postgres
     volumes:
-      - ./logs:/app/logs
-    restart: unless-stopped
+      - .:/app
 
 volumes:
   postgres_data:
