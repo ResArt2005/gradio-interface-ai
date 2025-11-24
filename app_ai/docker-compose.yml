@@ -19,7 +19,7 @@ services:
     container_name: gradio_app
     restart: always
     ports:
-      - "7860:7860"
+      - "7861:7860"
     depends_on:
       - db
     environment:
