@@ -1,3 +1,4 @@
+# tools/DBPostgresqlGradio.py
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 import pandas as pd
@@ -6,6 +7,9 @@ import json
 from config.config import Config
 from tools.debug import logger
 
+# Добавляем bcrypt для хэширования паролей
+import bcrypt
+from typing import Optional, Dict, Any
 
 class DBPostgresqlGradio:
     """sqlalchemy + psycopg[binary] — MIT License"""
@@ -13,6 +17,7 @@ class DBPostgresqlGradio:
     BASE_DIR = Path(__file__).parent
 
     def __init__(self, dbname: str, user: str, password: str, host: str, port: int):
+        # ВАЖНО: использую тот же connection URL формат, что и раньше
         self.connection_url = f"postgresql+psycopg://{user}:{password}@{host}:{port}/{dbname}"
         self.engine = create_engine(self.connection_url)
 
@@ -47,6 +52,103 @@ class DBPostgresqlGradio:
             return [dict(row._mapping) for row in result.fetchall()]
 
     # ===============================================================
+    # 🔹 0. НОВЫЕ МЕТОДЫ ДЛЯ АУТЕНТИФИКАЦИИ / ПОЛЬЗОВАТЕЛЕЙ
+    # ===============================================================
+
+    # ----- Вспомогательные функции хэширования -----
+    def hash_password(self, plain_password: str) -> str:
+        """
+        Хэширует пароль с помощью bcrypt и возвращает строковый хэш (utf-8).
+        """
+        if isinstance(plain_password, str):
+            plain_password = plain_password.encode("utf-8")
+        hashed = bcrypt.hashpw(plain_password, bcrypt.gensalt())
+        return hashed.decode("utf-8")
+
+    def verify_password_hash(self, plain_password: str, password_hash: str) -> bool:
+        """
+        Проверяет plain_password против password_hash.
+        Возвращает True/False.
+        """
+        try:
+            if isinstance(plain_password, str):
+                plain_password = plain_password.encode("utf-8")
+            if isinstance(password_hash, str):
+                password_hash = password_hash.encode("utf-8")
+            return bcrypt.checkpw(plain_password, password_hash)
+        except Exception as e:
+            logger.error(f"verify_password_hash error: {e}")
+            return False
+
+    # ----- CRUD для пользователей -----
+    def get_user_by_username(self, username: str) -> Optional[Dict[str, Any]]:
+        """
+        Возвращает запись пользователя как словарь: id, username, password_hash, created_at, last_login
+        Или None, если пользователь не найден.
+        """
+        sql = text("SELECT id, username, password_hash, created_at, last_login FROM users WHERE username = :username")
+        with self.engine.connect() as conn:
+            res = conn.execute(sql, {"username": username}).mappings().first()
+            if res:
+                return dict(res)
+            return None
+
+    def create_user(self, username: str, plain_password: str) -> int:
+        """
+        Создаёт пользователя в таблице users (хэширует пароль).
+        Возвращает id нового пользователя.
+        """
+        password_hash = self.hash_password(plain_password)
+        sql_check = text("SELECT id FROM users WHERE username = :username")
+        sql_insert = text("""
+            INSERT INTO users (username, password_hash)
+            VALUES (:username, :password_hash)
+            RETURNING id
+        """)
+        with self.engine.begin() as conn:
+            exists = conn.execute(sql_check, {"username": username}).first()
+            if exists:
+                raise ValueError(f"User '{username}' already exists (id={exists[0]}).")
+            res = conn.execute(sql_insert, {"username": username, "password_hash": password_hash}).first()
+            user_id = res[0]
+            logger.info(f"Created user '{username}' id={user_id}")
+            return user_id
+
+    def remove_user_by_username(self, username: str) -> None:
+        """
+        Удаляет пользователя по username. Благодаря ON DELETE CASCADE удалятся связанные чаты/сообщения.
+        """
+        sql = text("DELETE FROM users WHERE username = :username")
+        with self.engine.begin() as conn:
+            conn.execute(sql, {"username": username})
+            logger.info(f"Removed user '{username}' (if existed).")
+
+    def verify_user_credentials(self, username: str, plain_password: str) -> Optional[int]:
+        """
+        Проверяет логин/пароль. Если валидно — возвращает user_id, иначе None.
+        """
+        user = self.get_user_by_username(username)
+        if not user:
+            logger.debug(f"verify_user_credentials: user '{username}' not found")
+            return None
+        if not user.get("password_hash"):
+            logger.warning(f"User {username} has no password_hash stored")
+            return None
+        ok = self.verify_password_hash(plain_password, user["password_hash"])
+        if ok:
+            return user["id"]
+        return None
+
+    def update_last_login(self, user_id: int):
+        """
+        Обновляет поле last_login для пользователя (NOW()).
+        """
+        sql = text("UPDATE users SET last_login = NOW() WHERE id = :user_id")
+        with self.engine.begin() as conn:
+            conn.execute(sql, {"user_id": user_id})
+            logger.info(f"Updated last_login for user_id={user_id}")
+
+    # ===============================================================
     # 🔹 1. ВЫПОЛНЕНИЕ SQL-ФАЙЛА
     # ===============================================================
 
@@ -71,7 +173,7 @@ class DBPostgresqlGradio:
             raise
 
     # ===============================================================
-    # 🔹 2. РЕКУРСИВНОЕ ИЗВЛЕЧЕНИЕ ДЕРЕВА
+    # 🔹 2. РЕКУРСИВНОЕ ИЗВЛЕЧЕНИЕ ДЕРЕВА (оставлено без изменений)
     # ===============================================================
     def check_tables(self):
         sql = """
@@ -81,6 +183,7 @@ class DBPostgresqlGradio:
         """
         tables = self.select_as_dict(sql)
         logger.info(f"Таблицы в БД: {[t['table_name'] for t in tables]}")
+
     def get_tree_as_json(self):
         """
         Извлекает дерево из таблицы tree_nodes и возвращает его в виде JSON:
@@ -163,7 +266,6 @@ class DBPostgresqlGradio:
     # ===============================================================
     # 🔹 3. ЗАГРУЗКА JSON-ФАЙЛА В ТАБЛИЦУ
     # ===============================================================
-
     def load_json_to_tree(self, relative_json_path: str):
         """
         Загружает JSON дерево в таблицу prompt_tree.
@@ -206,6 +308,10 @@ class DBPostgresqlGradio:
             logger.error(f"Ошибка при загрузке JSON дерева: {e}")
             raise
 
+# ---------------------------------------------------------------------
+# НИЖЕ (в твоём файле) у тебя уже был код для инициализации экземпляра db.
+# Я оставляю это поведение — он создаёт объект db и вызывает check_tables.
+# ---------------------------------------------------------------------
 try:
     db = DBPostgresqlGradio(
         Config.DB_NAME,
@@ -226,4 +332,4 @@ except Exception as e:
 # Инициализация таблицы и загрузка данных
 #db.execute_sql_file("sql/create_prompt_tree.sql")
 #db.load_json_to_tree("json/prompt_tree.json")
-#print(db.get_tree_as_json())
+# print(db.get_tree_as_json())
