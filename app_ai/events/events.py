@@ -8,3 +8,6 @@ from components.chat_list import(
     new_chat, switch_chat, rename_chat, sync_chat_list, add_user_message,
     delete_chat
 )
+from components.auth import(
+    on_login_click, on_logout_click
+)

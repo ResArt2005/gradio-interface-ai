@@ -1,15 +1,16 @@
 import gradio as gr
 from events.events import (
     chip_click, on_textbox_change, add_user_message, fetch_llm_answer,
-    reset_to_root, clear_current_chat, new_chat, switch_chat, rename_chat, sync_chat_list, delete_chat
+    reset_to_root, clear_current_chat, new_chat, switch_chat, rename_chat, sync_chat_list, delete_chat,
+    on_login_click, on_logout_click
 )
 
 def bind_events(components: tuple):
     (
         chip_buttons, textbox, chatbot, clear, new_chat_btn, chat_list,
         rename_btn, rename_box, current_chat_id, chat_sessions,
-        chat_titles, top_tree_state, current_nodes, suppress_reset, interface,
-        delete_chat_btn
+        chat_titles, top_tree_state, current_nodes, suppress_reset, interface, delete_chat_btn,
+        authenticated, current_user_id, login_panel, main_panel, login_btn, login_user, login_password, login_status, btn_logout
     ) = components
 
     def focus_textbox():
@@ -73,3 +74,16 @@ def bind_events(components: tuple):
         [chat_titles, current_chat_id],
         [chat_list]
     ).then(focus_textbox, [], [textbox])
+    
+    # --- События для аутентификации ---
+    login_btn.click(
+        on_login_click,
+        inputs=[login_user, login_password],
+        outputs=[login_status, authenticated, current_user_id, login_panel, main_panel]
+    )
+
+    btn_logout.click(
+        on_logout_click,
+        inputs=[authenticated],
+        outputs=[authenticated, current_user_id, login_panel, main_panel]
+    )

@@ -105,56 +105,8 @@ def build_interface():
             bind_events((
                 chip_buttons, textbox, chatbot, clear, new_chat_btn, chat_list,
                 rename_btn_gr, rename_box, current_chat_id, chat_sessions,
-                chat_titles, top_tree_state, current_nodes, suppress_reset, interface,
-                delete_chat_btn
+                chat_titles, top_tree_state, current_nodes, suppress_reset, interface, delete_chat_btn,
+                authenticated, current_user_id, login_panel, main_panel, login_btn, login_user, login_password, login_status, btn_logout
             ))
-
-        # -----------------------
-        # Callbacks: login, logout
-        # -----------------------
-        def on_login_click(username, password):
-            """
-            Вызывается при клике 'Войти'. Возвращает:
-              login_status,
-              authenticated (State),
-              current_user_id (State),
-              login_panel visibility,
-              main_panel visibility
-            """
-            if not username or not password:
-                return "Введите логин и пароль", gr.update(), gr.update(), gr.update(visible=True), gr.update(visible=False)
-            try:
-                user_id = db.verify_user_credentials(username, password)
-                if user_id is None:
-                    logger.info(f"Failed login for {username}")
-                    return "Неверный логин или пароль", gr.update(False), gr.update(None), gr.update(visible=True), gr.update(visible=False)
-                # Успешный вход
-                db.update_last_login(user_id)
-                logger.success(f"User {username} (id={user_id}) logged in")
-                # Скрываем login_panel и показываем main_panel; устанавливаем auth state
-                return "Вход успешен", gr.update(True), gr.update(user_id), gr.update(visible=False), gr.update(visible=True)
-            except Exception as e:
-                logger.error(f"Login error: {e}")
-                return f"Ошибка при входе: {e}", gr.update(False), gr.update(None), gr.update(visible=True), gr.update(visible=False)
-
-        login_btn.click(
-            on_login_click,
-            inputs=[login_user, login_password],
-            outputs=[login_status, authenticated, current_user_id, login_panel, main_panel]
-        )
-
-        def on_logout_click(auth_state):
-            """
-            Выход: сбрасываем состояние аутентификации и показываем login_panel.
-            """
-            logger.info("User logged out (manual logout)")
-            # Очистим сессию (при желании можно и другие state очистить)
-            return gr.update(False), gr.update(None), gr.update(visible=True), gr.update(visible=False)
-
-        btn_logout.click(
-            on_logout_click,
-            inputs=[authenticated],
-            outputs=[authenticated, current_user_id, login_panel, main_panel]
-        )
 
     return interface
