@@ -32,7 +32,7 @@ PGUSER = Config.DB_USER
 PGPASSWORD = Config.DB_PASSWORD
 PGDATABASE = Config.DB_NAME
 
-DB_URL = f"postgresql+psycopg2://{PGUSER}:{PGPASSWORD}@{PGHOST}:{PGPORT}/{PGDATABASE}"
+DB_URL = f"postgresql+psycopg://{PGUSER}:{PGPASSWORD}@{PGHOST}:{PGPORT}/{PGDATABASE}"
 
 # --- Создаём engine SQLAlchemy ---
 engine = create_engine(DB_URL, pool_size=5, max_overflow=10, future=True)
