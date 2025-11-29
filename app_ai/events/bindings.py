@@ -1,34 +1,22 @@
-# events/bindings.py
-
 import gradio as gr
 from ui.UI import UI
 from events.events import (
-    chip_click, on_textbox_change,
     add_user_message, fetch_llm_answer, reset_to_root,
     clear_current_chat, new_chat, switch_chat, rename_chat,
     sync_chat_list, delete_chat,
     on_login_click, on_logout_click
 )
-
-
+from events.binds.chip_buttons import chip_buttons
+from events.binds.textbox_change_events import textbox_change_events
 def bind_events(ui: UI):
     """Привязка всех событий Gradio к UI-компонентам."""
     #  CHIP BUTTONS
     def focus_textbox():
         return gr.update(autofocus=True)
 
-    for i, btn in enumerate(ui.chip_buttons):
-        btn.click(
-            chip_click,
-            inputs=[gr.State(i), ui.current_nodes, ui.top_tree_state, ui.suppress_reset, ui.textbox],
-            outputs=[ui.textbox, *ui.chip_buttons, ui.current_nodes, ui.suppress_reset]
-        )
+    chip_buttons(ui)
     # TEXTBOX CHANGE EVENTS
-    ui.textbox.change(
-        on_textbox_change,
-        inputs=[ui.textbox, ui.current_nodes, ui.suppress_reset, ui.top_tree_state],
-        outputs=[*ui.chip_buttons, ui.current_nodes, ui.suppress_reset]
-    )
+    textbox_change_events(ui)
     #  CHAT MESSAGE FLOW
     ui.textbox.submit(
         add_user_message,
