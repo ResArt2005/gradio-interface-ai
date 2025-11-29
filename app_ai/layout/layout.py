@@ -9,7 +9,7 @@ from events.bindings import bind_events
 from static.load_static import *
 from tools.debug import logger
 
-from classes.UI import UI
+from ui.UI import UI
 
 
 # -------------------------------

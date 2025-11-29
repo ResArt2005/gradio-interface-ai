@@ -1,7 +1,7 @@
 # events/bindings.py
 
 import gradio as gr
-from classes.UI import UI
+from ui.UI import UI
 from events.events import (
     chip_click, on_textbox_change,
     add_user_message, fetch_llm_answer, reset_to_root,
