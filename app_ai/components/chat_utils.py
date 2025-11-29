@@ -35,7 +35,10 @@ def fetch_llm_answer(_, chat_id, chat_sessions):
         answer = data.get('answer', 'Ответ не получен')
         sources = data.get('sources', [])
     except Exception as e:
-        answer = f'Ошибка запроса: {e}'
+        #answer = f'Ошибка запроса: {e}'
+        last_user_msg = history[-1]['content'].split(']:\n\n', 1)[-1]
+        answer = f'Тестовый ответ от LLM на сообщение "{last_user_msg}"'
+        logger.info(answer)
         sources = []
 
     formatted = format_message('assistant', answer)
