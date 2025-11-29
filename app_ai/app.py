@@ -1,4 +1,4 @@
-from ui.layout import build_interface
+from layout.layout import build_interface
 from tools.debug import logger
 
 if __name__ == "__main__":

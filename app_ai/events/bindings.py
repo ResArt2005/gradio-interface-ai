@@ -1,89 +1,106 @@
+# events/bindings.py
+
 import gradio as gr
+from classes.UI import UI
 from events.events import (
-    chip_click, on_textbox_change, add_user_message, fetch_llm_answer,
-    reset_to_root, clear_current_chat, new_chat, switch_chat, rename_chat, sync_chat_list, delete_chat,
+    chip_click, on_textbox_change,
+    add_user_message, fetch_llm_answer, reset_to_root,
+    clear_current_chat, new_chat, switch_chat, rename_chat,
+    sync_chat_list, delete_chat,
     on_login_click, on_logout_click
 )
 
-def bind_events(components: tuple):
-    (
-        chip_buttons, textbox, chatbot, clear, new_chat_btn, chat_list,
-        rename_btn, rename_box, current_chat_id, chat_sessions,
-        chat_titles, top_tree_state, current_nodes, suppress_reset, interface, delete_chat_btn,
-        authenticated, current_user_id, login_panel, main_panel, login_btn, login_user, login_password, login_status, btn_logout
-    ) = components
 
+def bind_events(ui: UI):
+    """Привязка всех событий Gradio к UI-компонентам."""
+    #  CHIP BUTTONS
     def focus_textbox():
         return gr.update(autofocus=True)
 
-    # --- События для кнопок ---
-    for i, btn in enumerate(chip_buttons):
+    for i, btn in enumerate(ui.chip_buttons):
         btn.click(
             chip_click,
-            inputs=[gr.State(i), current_nodes, top_tree_state, suppress_reset, textbox],
-            outputs=[textbox, *chip_buttons, current_nodes, suppress_reset]
+            inputs=[gr.State(i), ui.current_nodes, ui.top_tree_state, ui.suppress_reset, ui.textbox],
+            outputs=[ui.textbox, *ui.chip_buttons, ui.current_nodes, ui.suppress_reset]
         )
-
-    textbox.change(
+    # TEXTBOX CHANGE EVENTS
+    ui.textbox.change(
         on_textbox_change,
-        inputs=[textbox, current_nodes, suppress_reset, top_tree_state],
-        outputs=[*chip_buttons, current_nodes, suppress_reset]
+        inputs=[ui.textbox, ui.current_nodes, ui.suppress_reset, ui.top_tree_state],
+        outputs=[*ui.chip_buttons, ui.current_nodes, ui.suppress_reset]
     )
-
-    # --- Основные действия ---
-    textbox.submit(
+    #  CHAT MESSAGE FLOW
+    ui.textbox.submit(
         add_user_message,
-        [textbox, current_chat_id, chat_sessions, chat_titles],
-        [textbox, chatbot, chat_sessions, chat_titles, chat_list]
-    ).then(fetch_llm_answer, [textbox, current_chat_id, chat_sessions], [chatbot, chat_sessions]
-    ).then(reset_to_root, [top_tree_state], [*chip_buttons, current_nodes, suppress_reset]
-    ).then(focus_textbox, [], [textbox])
-
-    clear.click(
-        clear_current_chat,
-        [current_chat_id, chat_sessions],
-        [chatbot, chat_sessions]
-    ).then(focus_textbox, [], [textbox])
-
-    new_chat_btn.click(
-        new_chat,
-        [chat_sessions, chat_titles],
-        [current_chat_id, chat_sessions, chat_titles, chat_list]
-    ).then(focus_textbox, [], [textbox])
-
-    chat_list.change(
-        switch_chat,
-        [chat_list, chat_titles, chat_sessions],
-        [current_chat_id, chatbot]
-    ).then(focus_textbox, [], [textbox])
-
-    delete_chat_btn.click(
-        delete_chat,
-        [current_chat_id, chat_sessions, chat_titles],
-        [current_chat_id, chat_sessions, chat_titles, chat_list]
-    ).then(focus_textbox, [], [textbox])
-
-    rename_btn.click(
-        rename_chat,
-        [rename_box, current_chat_id, chat_titles],
-        [chat_titles, chat_list, rename_box]
-    ).then(focus_textbox, [], [textbox])
-
-    interface.load(
-        sync_chat_list,
-        [chat_titles, current_chat_id],
-        [chat_list]
-    ).then(focus_textbox, [], [textbox])
-    
-    # --- События для аутентификации ---
-    login_btn.click(
-        on_login_click,
-        inputs=[login_user, login_password],
-        outputs=[login_status, authenticated, current_user_id, login_panel, main_panel]
+        inputs=[ui.textbox, ui.current_chat_id, ui.chat_sessions, ui.chat_titles],
+        outputs=[ui.textbox, ui.chatbot, ui.chat_sessions, ui.chat_titles, ui.chat_list]
+    ).then(
+        fetch_llm_answer,
+        [ui.textbox, ui.current_chat_id, ui.chat_sessions],
+        [ui.chatbot, ui.chat_sessions]
+    ).then(
+        reset_to_root,
+        [ui.top_tree_state],
+        [*ui.chip_buttons, ui.current_nodes, ui.suppress_reset]
+    ).then(
+        focus_textbox, [], [ui.textbox]
     )
-
-    btn_logout.click(
+    #  CLEAR CHAT
+    ui.clear.click(
+        clear_current_chat,
+        [ui.current_chat_id, ui.chat_sessions],
+        [ui.chatbot, ui.chat_sessions]
+    ).then(focus_textbox, [], [ui.textbox])
+    #  NEW CHAT
+    ui.new_chat_btn.click(
+        new_chat,
+        [ui.chat_sessions, ui.chat_titles],
+        [ui.current_chat_id, ui.chat_sessions, ui.chat_titles, ui.chat_list]
+    ).then(focus_textbox, [], [ui.textbox])
+    #  SWITCH CHAT
+    ui.chat_list.change(
+        switch_chat,
+        [ui.chat_list, ui.chat_titles, ui.chat_sessions],
+        [ui.current_chat_id, ui.chatbot]
+    ).then(focus_textbox, [], [ui.textbox])
+    #  DELETE CHAT
+    ui.delete_chat_btn.click(
+        delete_chat,
+        [ui.current_chat_id, ui.chat_sessions, ui.chat_titles],
+        [ui.current_chat_id, ui.chat_sessions, ui.chat_titles, ui.chat_list]
+    ).then(focus_textbox, [], [ui.textbox])
+    #  RENAME CHAT
+    ui.rename_btn_gr.click(
+        rename_chat,
+        [ui.rename_box, ui.current_chat_id, ui.chat_titles],
+        [ui.chat_titles, ui.chat_list, ui.rename_box]
+    ).then(focus_textbox, [], [ui.textbox])
+    #  SYNC CHAT LIST ON LOAD
+    ui.interface.load(
+        sync_chat_list,
+        [ui.chat_titles, ui.current_chat_id],
+        [ui.chat_list]
+    ).then(focus_textbox, [], [ui.textbox])
+    #  LOGIN
+    ui.login_btn.click(
+        on_login_click,
+        inputs=[ui.login_user, ui.login_password],
+        outputs=[
+            ui.login_status,
+            ui.authenticated,
+            ui.current_user_id,
+            ui.login_panel,
+            ui.main_panel
+        ]
+    )
+    #  LOGOUT
+    ui.btn_logout.click(
         on_logout_click,
-        inputs=[authenticated],
-        outputs=[authenticated, current_user_id, login_panel, main_panel]
+        inputs=[ui.authenticated],
+        outputs=[
+            ui.authenticated,
+            ui.current_user_id,
+            ui.login_panel,
+            ui.main_panel
+        ]
     )
