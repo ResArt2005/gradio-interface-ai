@@ -1,13 +1,6 @@
-# ui/layout.py
-from typing import Dict
-import uuid
 import gradio as gr
-
-from tools.fast_prompt_script import tree
-from events.events import MAX_BUTTONS
 from events.bindings import bind_events
 from static.load_static import *
-from tools.debug import logger
 from ui.UI import UI
 from frontend.user_auth import (
     authenticate_user, logout_user
