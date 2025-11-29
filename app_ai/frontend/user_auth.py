@@ -10,3 +10,10 @@ def authenticate_user(ui: UI):
         ui.login_password = gr.Textbox(label="Пароль", placeholder="Введите пароль", type="password")
         ui.login_btn = gr.Button(value="Войти")
         ui.login_status = gr.Text(value="", interactive=False)
+
+def logout_user(ui: UI):
+    ui.authenticated = gr.State(False)
+    ui.current_user_id = gr.State(None)
+    with gr.Row():
+        ui.btn_logout = gr.Button(value="Выйти", variant="secondary", elem_id="btn_logout")
+        gr.Markdown("")
