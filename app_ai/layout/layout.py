@@ -8,28 +8,13 @@ from events.events import MAX_BUTTONS
 from events.bindings import bind_events
 from static.load_static import *
 from tools.debug import logger
-
 from ui.UI import UI
-
-
-# -------------------------------
-# Авторизация вынесена в функцию
-# -------------------------------
-def authenticate_user(ui: UI):
-    ui.authenticated = gr.State(False)
-    ui.current_user_id = gr.State(None)
-
-    with gr.Column(visible=True, elem_id="login_panel") as ui.login_panel:
-        gr.Markdown("### Вход")
-        ui.login_user = gr.Textbox(label="Логин", placeholder="Введите логин", lines=1)
-        ui.login_password = gr.Textbox(label="Пароль", placeholder="Введите пароль", type="password")
-        ui.login_btn = gr.Button(value="Войти")
-        ui.login_status = gr.Text(value="", interactive=False)
+from frontend.authenticate_user import (
+    authenticate_user
+)
 # Основной layout
 def build_interface():
-
     ui = UI()
-
     custom_head = f"""
     <style>{styles_css}</style>
     <script>
