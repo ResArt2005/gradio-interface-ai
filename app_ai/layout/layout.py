@@ -11,6 +11,8 @@ from frontend.chat import (
 from frontend.unseen_elements import (
     initialize_unseen_ui
 )
+from frontend.avatar_settings_block import ( avatar_settings_block
+)
 # Основной layout
 def build_interface():
     custom_head = f"""
@@ -41,6 +43,7 @@ def build_interface():
         # Основная панель (пока скрыта)
         with gr.Column(visible=False, elem_id="main_panel") as ui.main_panel:
             logout_user(ui)
+            avatar_settings_block(ui)
             with gr.Row():
                 # Левая колонка (список чатов)
                 chat_list_column(ui)

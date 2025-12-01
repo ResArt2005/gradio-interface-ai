@@ -1,9 +1,6 @@
 from ui.UI import UI
 import gradio as gr
 def authenticate_user(ui: UI):
-    ui.authenticated = gr.State(False)
-    ui.current_user_id = gr.State(None)
-
     with gr.Column(visible=True, elem_id="login_panel") as ui.login_panel:
         gr.Markdown("### Вход")
         ui.login_user = gr.Textbox(label="Логин", placeholder="Введите логин", lines=1)
@@ -12,8 +9,6 @@ def authenticate_user(ui: UI):
         ui.login_status = gr.Text(value="", interactive=False)
 
 def logout_user(ui: UI):
-    ui.authenticated = gr.State(False)
-    ui.current_user_id = gr.State(None)
     with gr.Row():
         ui.btn_logout = gr.Button(value="Выйти", variant="secondary", elem_id="btn_logout")
         gr.Markdown("")

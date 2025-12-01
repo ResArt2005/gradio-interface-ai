@@ -44,3 +44,10 @@ class UI:
     top_tree_state: Optional[gr.State] = None
     current_nodes: Optional[gr.State] = None
     suppress_reset: Optional[gr.State] = None
+
+    # ----- Аватар -----
+    avatar_preview: Optional[gr.Image] = None
+    avatar_upload: Optional[gr.File] = None
+    avatar_save_btn: Optional[gr.Button] = None
+    status_message: Optional[gr.Text] = None
+    # ----- Прочее -----

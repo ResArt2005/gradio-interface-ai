@@ -1,5 +1,6 @@
 import gradio as gr
 from ui.UI import UI
+from tools.debug import logger
 from events.events import (
     add_user_message, fetch_llm_answer, reset_to_root,
     clear_current_chat, new_chat, switch_chat, rename_chat,
@@ -8,6 +9,7 @@ from events.events import (
 )
 from events.binds.chip_buttons import chip_buttons
 from events.binds.textbox_change_events import textbox_change_events
+from events.binds.on_avatar_save import on_avatar_save_btn
 def bind_events(ui: UI):
     """Привязка всех событий Gradio к UI-компонентам."""
     #  CHIP BUTTONS
@@ -92,3 +94,4 @@ def bind_events(ui: UI):
             ui.main_panel
         ]
     )
+    on_avatar_save_btn(ui)

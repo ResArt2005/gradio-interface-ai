@@ -1,4 +1,4 @@
-from tools.DBPostgresqlGradio import db
+from tools.db_tools.DBPostgresqlGradio import db
 '''from pathlib import Path
 import json
 def parse_hierarchy(lines:list[str])->list[dict[str, any]]:

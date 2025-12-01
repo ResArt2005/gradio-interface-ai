@@ -1,7 +1,7 @@
 import gradio as gr
 import uuid
 from tools.debug import logger
-from tools.DBPostgresqlGradio import db
+from tools.db_tools.DBPostgresqlGradio import db
 # --- Утилита для построения списка кортежей (label, value) ---
 def build_choices(chat_titles: dict):
     return [(title, chat_id) for chat_id, title in chat_titles.items()]

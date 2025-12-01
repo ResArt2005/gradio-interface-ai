@@ -1,6 +1,6 @@
 from tools.debug import logger
 import gradio as gr
-from tools.DBPostgresqlGradio import db
+from tools.db_tools.DBPostgresqlGradio import db
 def on_login_click(username, password):
             """
             Вызывается при клике 'Войти'. Возвращает:
@@ -21,7 +21,7 @@ def on_login_click(username, password):
                 db.update_last_login(user_id)
                 logger.success(f"User {username} (id={user_id}) logged in")
                 # Скрываем login_panel и показываем main_panel; устанавливаем auth state
-                return "Вход успешен", gr.update(True), gr.update(user_id), gr.update(visible=False), gr.update(visible=True)
+                return "Вход успешен", gr.update(True), user_id, gr.update(visible=False), gr.update(visible=True)
             except Exception as e:
                 logger.error(f"Login error: {e}")
                 return f"Ошибка при входе: {e}", gr.update(False), gr.update(None), gr.update(visible=True), gr.update(visible=False)

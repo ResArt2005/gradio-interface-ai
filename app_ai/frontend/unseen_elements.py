@@ -16,3 +16,7 @@ def initialize_unseen_ui(ui: UI):
     ui.rename_btn_gr = gr.Button(value="gr_test", elem_id="gr_rename_chat")
     ui.rename_box = gr.Textbox(placeholder="Переименовать чат", elem_id="gr_rename_box")
     ui.delete_chat_btn = gr.Button(value="🗑️ Удалить чат", variant="stop", elem_id="gr_delete_chat")
+
+    # Состояния для аутентификации
+    ui.authenticated = gr.State(False)
+    ui.current_user_id = gr.State(None)
