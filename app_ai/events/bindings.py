@@ -93,7 +93,8 @@ def bind_events(ui: UI):
             ui.current_user_id,
             ui.login_panel,
             ui.main_panel,
-            ui.avatar_preview
+            ui.avatar_preview,
+            ui.avatar_upload
         ]
     )
     on_avatar_change_btn(ui)

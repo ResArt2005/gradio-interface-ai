@@ -35,4 +35,4 @@ def on_logout_click(auth_state):
     """
     logger.info("User logged out (manual logout)")
     # Очистим сессию (при желании можно и другие state очистить)
-    return gr.update(False), gr.update(None), gr.update(visible=True), gr.update(visible=False), None
+    return gr.update(False), gr.update(None), gr.update(visible=True), gr.update(visible=False), gr.update(None), gr.update(None)
