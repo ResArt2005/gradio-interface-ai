@@ -1,6 +1,7 @@
 from tools.debug import logger
 import gradio as gr
 from tools.db_tools.DBPostgresqlGradio import db
+from tools.db_tools.media_manager import get_user_avatar_path
 def on_login_click(username, password):
             """
             Вызывается при клике 'Войти'. Возвращает:
@@ -21,7 +22,9 @@ def on_login_click(username, password):
                 db.update_last_login(user_id)
                 logger.success(f"User {username} (id={user_id}) logged in")
                 # Скрываем login_panel и показываем main_panel; устанавливаем auth state
-                return "Вход успешен", gr.update(True), user_id, gr.update(visible=False), gr.update(visible=True)
+                avatar_path = get_user_avatar_path(user_id)
+                avatar_url = f"/app/{avatar_path}" if avatar_path else None
+                return "Вход успешен", gr.update(True), user_id, gr.update(visible=False), gr.update(visible=True), avatar_url
             except Exception as e:
                 logger.error(f"Login error: {e}")
                 return f"Ошибка при входе: {e}", gr.update(False), gr.update(None), gr.update(visible=True), gr.update(visible=False)
@@ -32,4 +35,4 @@ def on_logout_click(auth_state):
     """
     logger.info("User logged out (manual logout)")
     # Очистим сессию (при желании можно и другие state очистить)
-    return gr.update(False), gr.update(None), gr.update(visible=True), gr.update(visible=False)
+    return gr.update(False), gr.update(None), gr.update(visible=True), gr.update(visible=False), None

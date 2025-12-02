@@ -83,10 +83,10 @@ class DBPostgresqlGradio:
     # ----- CRUD для пользователей -----
     def get_user_by_username(self, username: str) -> Optional[Dict[str, Any]]:
         """
-        Возвращает запись пользователя как словарь: id, username, password_hash, created_at, last_login
+        Возвращает запись пользователя как словарь: user_id, username, password_hash, created_at, last_login
         Или None, если пользователь не найден.
         """
-        sql = text("SELECT id, username, password_hash, created_at, last_login FROM users WHERE username = :username")
+        sql = text("SELECT user_id, username, password_hash, created_at, last_login FROM users WHERE username = :username")
         with self.engine.connect() as conn:
             res = conn.execute(sql, {"username": username}).mappings().first()
             if res:
@@ -96,19 +96,19 @@ class DBPostgresqlGradio:
     def create_user(self, username: str, plain_password: str) -> int:
         """
         Создаёт пользователя в таблице users (хэширует пароль).
-        Возвращает id нового пользователя.
+        Возвращает user_id нового пользователя.
         """
         password_hash = self.hash_password(plain_password)
-        sql_check = text("SELECT id FROM users WHERE username = :username")
+        sql_check = text("SELECT user_id FROM users WHERE username = :username")
         sql_insert = text("""
             INSERT INTO users (username, password_hash)
             VALUES (:username, :password_hash)
-            RETURNING id
+            RETURNING user_id
         """)
         with self.engine.begin() as conn:
             exists = conn.execute(sql_check, {"username": username}).first()
             if exists:
-                raise ValueError(f"User '{username}' already exists (id={exists[0]}).")
+                raise ValueError(f"User '{username}' already exists (user_id={exists[0]}).")
             res = conn.execute(sql_insert, {"username": username, "password_hash": password_hash}).first()
             user_id = res[0]
             logger.info(f"Created user '{username}' id={user_id}")
@@ -136,14 +136,14 @@ class DBPostgresqlGradio:
             return None
         ok = self.verify_password_hash(plain_password, user["password_hash"])
         if ok:
-            return user["id"]
+            return user["user_id"]
         return None
 
     def update_last_login(self, user_id: int):
         """
         Обновляет поле last_login для пользователя (NOW()).
         """
-        sql = text("UPDATE users SET last_login = NOW() WHERE id = :user_id")
+        sql = text("UPDATE users SET last_login = NOW() WHERE user_id = :user_id")
         with self.engine.begin() as conn:
             conn.execute(sql, {"user_id": user_id})
             logger.info(f"Updated last_login for user_id={user_id}")

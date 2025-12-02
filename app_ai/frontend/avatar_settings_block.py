@@ -2,10 +2,8 @@ import gradio as gr
 from ui.UI import UI
 
 
-def avatar_settings_block(ui:UI):
-    # Элементы для работы с аватаром
+def avatar_settings_block(ui: UI):
     with gr.Row(elem_id="avatar_row", equal_height=True):
-        # Превью (квадрат 40x40)
         ui.avatar_preview = gr.Image(
             label="",
             width=40,
@@ -16,18 +14,17 @@ def avatar_settings_block(ui:UI):
             type="filepath",
         )
 
-        # Загрузчик изображения
         ui.avatar_upload = gr.File(
-            label="Загрузить аватар",
+            label="Выбрать файл",
             file_types=["image"],
             elem_id="avatar_upload",
         )
 
-        # Кнопка сохранить
-        ui.avatar_save_btn = gr.Button(
-            "Сохранить",
-            elem_id="avatar_save_btn"
+        ui.avatar_change_btn = gr.Button(
+            value="Изменить",
+            elem_id="avatar_change_btn"
         )
-        
-        ui.status_message = gr.Text(label="Статус загрузки аватара", elem_id="avatar_status")
-    return ui.avatar_preview, ui.avatar_upload, ui.avatar_save_btn
+
+    ui.status_message = gr.Markdown("", elem_id="avatar_status")
+
+    return ui.avatar_preview, ui.avatar_upload, ui.avatar_change_btn

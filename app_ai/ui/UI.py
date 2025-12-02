@@ -48,6 +48,6 @@ class UI:
     # ----- Аватар -----
     avatar_preview: Optional[gr.Image] = None
     avatar_upload: Optional[gr.File] = None
-    avatar_save_btn: Optional[gr.Button] = None
+    avatar_change_btn: Optional[gr.Button] = None
     status_message: Optional[gr.Text] = None
     # ----- Прочее -----

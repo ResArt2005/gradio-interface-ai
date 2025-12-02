@@ -9,7 +9,7 @@ from events.events import (
 )
 from events.binds.chip_buttons import chip_buttons
 from events.binds.textbox_change_events import textbox_change_events
-from events.binds.on_avatar_save import on_avatar_save_btn
+from events.binds.on_avatar_change import on_avatar_change_btn
 def bind_events(ui: UI):
     """Привязка всех событий Gradio к UI-компонентам."""
     #  CHIP BUTTONS
@@ -80,7 +80,8 @@ def bind_events(ui: UI):
             ui.authenticated,
             ui.current_user_id,
             ui.login_panel,
-            ui.main_panel
+            ui.main_panel,
+            ui.avatar_preview
         ]
     )
     #  LOGOUT
@@ -91,7 +92,8 @@ def bind_events(ui: UI):
             ui.authenticated,
             ui.current_user_id,
             ui.login_panel,
-            ui.main_panel
+            ui.main_panel,
+            ui.avatar_preview
         ]
     )
-    on_avatar_save_btn(ui)
+    on_avatar_change_btn(ui)
