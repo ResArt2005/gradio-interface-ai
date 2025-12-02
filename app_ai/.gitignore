@@ -1,0 +1,14 @@
+other/
+# Virtual Environment
+env/
+venv/
+ENV/
+**/__pycache__/
+# Docker
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
