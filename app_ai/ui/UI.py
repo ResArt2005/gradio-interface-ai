@@ -4,11 +4,6 @@ from typing import List, Dict, Optional
 
 
 class UI:
-    """
-    Контейнер всех UI-компонентов Gradio.
-    Упрощает передачу элементов в бинды и улучшает читаемость.
-    """
-
     # ----- Основные элементы -----
     interface: Optional[gr.Blocks] = None
 
