@@ -1,5 +1,5 @@
 import gradio as gr
-from tools.db_tools.media_manager import replace_user_avatar, get_user_avatar_path
+from components.avatar_manager import replace_user_avatar, get_user_avatar_path
 from tools.debug import logger
 from ui.UI import UI
 

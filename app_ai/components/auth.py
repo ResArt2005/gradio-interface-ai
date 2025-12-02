@@ -1,7 +1,7 @@
 from tools.debug import logger
 import gradio as gr
-from tools.db_tools.DBPostgresqlGradio import db
-from tools.db_tools.media_manager import get_user_avatar_path
+from tools.DBPostgresqlGradio import db
+from components.avatar_manager import get_user_avatar_path
 def on_login_click(username, password):
             """
             Вызывается при клике 'Войти'. Возвращает:
