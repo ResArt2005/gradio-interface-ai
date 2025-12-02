@@ -57,11 +57,11 @@ def add_user(username: str, password: str) -> int:
     with engine.begin() as conn:
         # сначала проверим, нет ли такого username
         r = conn.execute(
-            text("SELECT id FROM users WHERE username = :username"),
+            text("SELECT user_id FROM users WHERE username = :username"),
             {"username": username}
         ).first()
         if r is not None:
-            raise ValueError(f"User '{username}' already exists (id={r[0]}).")
+            raise ValueError(f"User '{username}' already exists (user_id={r[0]}).")
 
         # вставим запись
         res = conn.execute(
@@ -69,13 +69,13 @@ def add_user(username: str, password: str) -> int:
                 """
                 INSERT INTO users (username, password_hash)
                 VALUES (:username, :password_hash)
-                RETURNING id;
+                RETURNING user_id;
                 """
             ),
             {"username": username, "password_hash": password_hash}
         ).first()
         user_id = res[0]
-        print(f"Created user '{username}' with id={user_id}")
+        print(f"Created user '{username}' with user_id={user_id}")
         return user_id
 
 
@@ -85,7 +85,7 @@ def remove_user(username: str) -> None:
         raise ValueError("username is empty")
     with engine.begin() as conn:
         r = conn.execute(
-            text("SELECT id FROM users WHERE username = :username"),
+            text("SELECT user_id FROM users WHERE username = :username"),
             {"username": username}
         ).first()
         if r is None:
