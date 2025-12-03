@@ -1,6 +1,6 @@
 import uuid
 from pathlib import Path
-from tools.DBPostgresqlGradio import db
+from tools.dbpg.DBPostgresqlGradio import db
 
 MEDIA_DIR = Path("/app/media")
 
