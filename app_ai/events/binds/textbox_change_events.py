@@ -1,5 +1,5 @@
 from ui.UI import UI
-from events.events import on_textbox_change
+from components.prompt_tree import on_textbox_change
 def textbox_change_events(ui:UI):
     ui.textbox.change(
         on_textbox_change,

@@ -1,6 +1,6 @@
 from ui.UI import UI
 import gradio as gr
-from events.events import sync_chat_list
+from components.chat_list import sync_chat_list
 
 def sync_chat_list_on_load(ui: UI):
     """Привязка события синхронизации списка чатов при загрузке интерфейса."""

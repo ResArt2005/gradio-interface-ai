@@ -1,7 +1,7 @@
 from ui.UI import UI
 import gradio as gr
 from tools.fast_prompt_script import tree
-from events.events import MAX_BUTTONS
+from components.prompt_tree import MAX_BUTTONS
 from frontend.user_elements import (
     logout_user, open_settings_panel
 )

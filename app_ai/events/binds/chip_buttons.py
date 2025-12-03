@@ -1,4 +1,4 @@
-from events.events import (
+from components.prompt_tree import (
     chip_click
 )
 import gradio as gr

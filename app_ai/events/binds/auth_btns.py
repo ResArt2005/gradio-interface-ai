@@ -1,5 +1,5 @@
 from ui.UI import UI
-from events.events import ( on_login_click, on_logout_click )
+from components.auth import ( on_login_click, on_logout_click )
 
 def auth_btns(ui: UI):
     """Привязка событий для кнопок аутентификации."""

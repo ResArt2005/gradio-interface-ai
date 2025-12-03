@@ -1,9 +1,9 @@
 from ui.UI import UI
 import gradio as gr
-from events.events import (
-    clear_current_chat, new_chat, switch_chat, rename_chat, delete_chat
+from components.chat_list import(
+    new_chat, switch_chat, rename_chat, delete_chat
 )
-
+from components.chat_utils import clear_current_chat
 def chat_actions(ui: UI):
     """Привязка событий для действий чата."""
     def focus_textbox():

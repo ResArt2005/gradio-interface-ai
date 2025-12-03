@@ -1,9 +1,8 @@
 from ui.UI import UI
 import gradio as gr
-from events.events import (
-    add_user_message, fetch_llm_answer, reset_to_root
-)
-
+from components.prompt_tree import reset_to_root
+from components.chat_list import add_user_message 
+from components.chat_utils import fetch_llm_answer 
 def chat_message_flow(ui:UI):
     """Привязка событий для потока сообщений чата."""
     def focus_textbox():
