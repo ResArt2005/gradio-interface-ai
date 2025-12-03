@@ -34,7 +34,7 @@ def email_settings_block(ui: UI):
         ui.e_mail = gr.Textbox(
             label="E-mail",
             placeholder="Введите ваш e-mail",
-            elem_id="email_textbox",
+            elem_id="email_textbox"
         )
         ui.email_change_btn = gr.Button(
             value="Изменить e-mail"
