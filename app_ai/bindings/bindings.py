@@ -2,7 +2,7 @@ import gradio as gr
 from ui.UI import UI
 from bindings.binds.chip_buttons import chip_buttons
 from bindings.binds.textbox_change_events import textbox_change_events
-from bindings.binds.user_settings import open_settings_panel_btn, on_avatar_change_btn, back_to_main_panel_btn
+from bindings.binds.user_settings import open_settings_panel_btn, fio_change_btn, on_avatar_change_btn, back_to_main_panel_btn
 from bindings.binds.chat_message_flow import chat_message_flow
 from bindings.binds.chat_actions import chat_actions
 from bindings.binds.sync_chat_list_on_load import sync_chat_list_on_load
@@ -27,3 +27,5 @@ def bind_events(ui: UI):
     on_avatar_change_btn(ui)
     # BACK TO MAIN PANEL EVENT
     back_to_main_panel_btn(ui)
+    # FIO CHANGE EVENT
+    fio_change_btn(ui)

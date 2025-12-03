@@ -3,7 +3,7 @@ from bindings.bindings import bind_events
 from static.load_static import *
 from ui.UI import UI
 from frontend.user_elements import (
-    authenticate_user
+    authenticate_user, debug_panel
 )
 from frontend.chat import (
     chat_list_column, chatbot_column
@@ -48,6 +48,7 @@ def build_interface():
                 # Правая колонка (чат)
                 chatbot_column(ui)
         with gr.Column(visible=False, elem_id="settings_panel") as ui.settings_panel:
+            debug_panel(ui)
             avatar_settings_block(ui)
             email_settings_block(ui)
             FIO_block(ui)

@@ -13,7 +13,10 @@ def auth_btns(ui: UI):
             ui.current_user_id,
             ui.login_panel,
             ui.main_panel,
-            ui.avatar_preview
+            ui.avatar_preview,
+            ui.first_name,
+            ui.last_name,
+            ui.surname
         ]
     )
     #  LOGOUT
@@ -21,11 +24,16 @@ def auth_btns(ui: UI):
         on_logout_click,
         inputs=[ui.authenticated],
         outputs=[
+            ui.login_status,
+            ui.status_message,
             ui.authenticated,
             ui.current_user_id,
             ui.login_panel,
             ui.main_panel,
             ui.avatar_preview,
-            ui.avatar_upload
+            ui.avatar_upload,
+            ui.first_name,
+            ui.last_name,
+            ui.surname
         ]
     )

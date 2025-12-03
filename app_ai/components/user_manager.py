@@ -1,5 +1,5 @@
 import gradio as gr
-from tools.dbpg.DB_users import replace_user_avatar, get_user_avatar_path
+from tools.dbpg.DB_users import replace_user_avatar, get_user_avatar_path, change_user_fio, get_user_fio
 from tools.debug import logger
 def on_avatar_change(file: str, user_id: int):
     if not user_id:
@@ -28,8 +28,19 @@ def on_avatar_change(file: str, user_id: int):
     current = get_user_avatar_path(user_id)
     return (f"/app/{current}" if current else None), "Аватар не выбран"
 
+def fio_change(first_name: str, last_name: str, surname:str, user_id: int):
+    if not user_id:
+        return gr.update(''), gr.update(''), gr.update(''), "Ошибка: пользователь не авторизован"
+    # Логика обновления ФИО в базе данных
+    if not first_name or not last_name:
+        return gr.update(''), gr.update(''), gr.update(''), "Ошибка: Имя и Фамилия обязательны"
+    change_user_fio(user_id, first_name, last_name, surname)
+    logger.info("ФИО обновлено для user_id=%s -> %s", user_id, f"{last_name} {first_name} {surname if surname else ''}")
+    return gr.update(first_name), gr.update(last_name), gr.update(surname), "Актуальное ФИО сохранено"
+
+
 def open_settings_panel():
     return gr.update(visible=False), gr.update(visible=True)
 
 def back_to_main_panel():
-    return gr.update(visible=True), gr.update(visible=False)
+    return gr.update(visible=True), gr.update(visible=False), ''

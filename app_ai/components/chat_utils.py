@@ -1,9 +1,7 @@
-import gradio as gr
 import requests
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import os
-import uuid
 from tools.debug import logger
 FASTAPI_URL = "http://host.docker.internal:8000/query"
 

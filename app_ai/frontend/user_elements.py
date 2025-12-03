@@ -1,5 +1,10 @@
 from ui.UI import UI
 import gradio as gr
+
+def debug_panel(ui: UI):
+    with gr.Column(elem_id="debug_panel"):
+        ui.status_message = gr.Markdown("", elem_id="avatar_status")
+
 def authenticate_user(ui: UI):
     with gr.Column(visible=True, elem_id="login_panel") as ui.login_panel:
         gr.Markdown("### Вход")

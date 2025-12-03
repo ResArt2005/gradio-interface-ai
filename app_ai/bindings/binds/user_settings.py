@@ -1,4 +1,4 @@
-from components.user_manager import on_avatar_change, open_settings_panel, back_to_main_panel
+from components.user_manager import on_avatar_change, fio_change, open_settings_panel, back_to_main_panel
 from ui.UI import UI
     
 
@@ -20,5 +20,12 @@ def back_to_main_panel_btn(ui: UI):
     ui.back_to_main_btn.click(
         fn=back_to_main_panel,
         inputs=[],
-        outputs=[ui.main_panel, ui.settings_panel]
+        outputs=[ui.main_panel, ui.settings_panel, ui.status_message]
+    )
+
+def fio_change_btn(ui: UI):
+    ui.FIO_change_btn.click(
+        fio_change,
+        inputs=[ui.first_name, ui.last_name, ui.surname, ui.current_user_id],
+        outputs=[ui.first_name, ui.last_name, ui.surname, ui.status_message]
     )

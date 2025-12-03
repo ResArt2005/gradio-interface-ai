@@ -25,8 +25,6 @@ def avatar_settings_block(ui: UI):
             elem_id="avatar_change_btn"
         )
 
-    ui.status_message = gr.Markdown("", elem_id="avatar_status")
-
     return ui.avatar_preview, ui.avatar_upload, ui.avatar_change_btn
 
 def email_settings_block(ui: UI):

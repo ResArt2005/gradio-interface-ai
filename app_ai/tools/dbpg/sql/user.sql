@@ -1,5 +1,6 @@
 CREATE TABLE public.users (
 	user_id int4 DEFAULT nextval('users_id_seq'::regclass) NOT NULL,
+	user_ip_adress varchar(50) NULL,
 	username varchar(50) NOT NULL,
 	password_hash text NOT NULL,
 	created_at timestamp DEFAULT now() NOT NULL,
