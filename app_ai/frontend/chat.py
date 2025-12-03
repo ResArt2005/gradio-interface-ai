@@ -2,6 +2,9 @@ from ui.UI import UI
 import gradio as gr
 from tools.fast_prompt_script import tree
 from events.events import MAX_BUTTONS
+from frontend.user_elements import (
+    logout_user, open_settings_panel
+)
 def chat_list_column(ui: UI):
     # Левая колонка (список чатов)
     with gr.Column(scale=1):
@@ -13,6 +16,8 @@ def chat_list_column(ui: UI):
             elem_id="chat_list",
             elem_classes="custom-radio"
         )
+        open_settings_panel(ui)
+        logout_user(ui)
 def chatbot_column(ui: UI):
     # Правая колонка (чат)
     with gr.Column(scale=4):

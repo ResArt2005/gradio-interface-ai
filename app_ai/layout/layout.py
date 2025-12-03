@@ -3,7 +3,7 @@ from events.bindings import bind_events
 from static.load_static import *
 from ui.UI import UI
 from frontend.user_elements import (
-    authenticate_user, logout_user, open_settings_panel
+    authenticate_user
 )
 from frontend.chat import (
     chat_list_column, chatbot_column
@@ -42,9 +42,6 @@ def build_interface():
         initialize_unseen_ui(ui)
         # Основная панель
         with gr.Column(visible=False, elem_id="main_panel") as ui.main_panel:
-            with gr.Row():
-                logout_user(ui)
-                open_settings_panel(ui)
             with gr.Row():
                 # Левая колонка (список чатов)
                 chat_list_column(ui)

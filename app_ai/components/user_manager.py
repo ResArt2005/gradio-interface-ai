@@ -28,8 +28,8 @@ def on_avatar_change(file: str, user_id: int):
     current = get_user_avatar_path(user_id)
     return (f"/app/{current}" if current else None), "Аватар не выбран"
 
-def open_settings_panel_btn():
+def open_settings_panel():
     return gr.update(visible=False), gr.update(visible=True)
 
-def back_to_main_panel_btn():
+def back_to_main_panel():
     return gr.update(visible=True), gr.update(visible=False)
