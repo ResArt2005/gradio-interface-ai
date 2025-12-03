@@ -1,4 +1,3 @@
-# tools/DBPostgresqlGradio.py
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 import pandas as pd
@@ -51,25 +50,14 @@ class DBPostgresqlGradio:
             result = conn.execute(text(sql))
             return [dict(row._mapping) for row in result.fetchall()]
 
-    # ===============================================================
-    # 🔹 0. НОВЫЕ МЕТОДЫ ДЛЯ АУТЕНТИФИКАЦИИ / ПОЛЬЗОВАТЕЛЕЙ
-    # ===============================================================
-
-    # ----- Вспомогательные функции хэширования -----
+    # 0. НОВЫЕ МЕТОДЫ ДЛЯ АУТЕНТИФИКАЦИИ / ПОЛЬЗОВАТЕЛЕЙ
     def hash_password(self, plain_password: str) -> str:
-        """
-        Хэширует пароль с помощью bcrypt и возвращает строковый хэш (utf-8).
-        """
         if isinstance(plain_password, str):
             plain_password = plain_password.encode("utf-8")
         hashed = bcrypt.hashpw(plain_password, bcrypt.gensalt())
         return hashed.decode("utf-8")
 
     def verify_password_hash(self, plain_password: str, password_hash: str) -> bool:
-        """
-        Проверяет plain_password против password_hash.
-        Возвращает True/False.
-        """
         try:
             if isinstance(plain_password, str):
                 plain_password = plain_password.encode("utf-8")
@@ -82,10 +70,6 @@ class DBPostgresqlGradio:
 
     # ----- CRUD для пользователей -----
     def get_user_by_username(self, username: str) -> Optional[Dict[str, Any]]:
-        """
-        Возвращает запись пользователя как словарь: user_id, username, password_hash, created_at, last_login
-        Или None, если пользователь не найден.
-        """
         sql = text("SELECT user_id, username, password_hash, created_at, last_login FROM users WHERE username = :username")
         with self.engine.connect() as conn:
             res = conn.execute(sql, {"username": username}).mappings().first()
@@ -124,9 +108,6 @@ class DBPostgresqlGradio:
             logger.info(f"Removed user '{username}' (if existed).")
 
     def verify_user_credentials(self, username: str, plain_password: str) -> Optional[int]:
-        """
-        Проверяет логин/пароль. Если валидно — возвращает user_id, иначе None.
-        """
         user = self.get_user_by_username(username)
         if not user:
             logger.debug(f"verify_user_credentials: user '{username}' not found")
@@ -140,23 +121,13 @@ class DBPostgresqlGradio:
         return None
 
     def update_last_login(self, user_id: int):
-        """
-        Обновляет поле last_login для пользователя (NOW()).
-        """
         sql = text("UPDATE users SET last_login = NOW() WHERE user_id = :user_id")
         with self.engine.begin() as conn:
             conn.execute(sql, {"user_id": user_id})
             logger.info(f"Updated last_login for user_id={user_id}")
-
-    # ===============================================================
-    # 🔹 1. ВЫПОЛНЕНИЕ SQL-ФАЙЛА
-    # ===============================================================
-
+    # ВЫПОЛНЕНИЕ SQL-ФАЙЛА
     def execute_sql_file(self, relative_path: str):
-        """
-        Выполнить SQL-файл по относительному пути.
-        Пример: db.execute_sql_file('sql/init_tree_table.sql')
-        """
+        """Выполнить SQL-файл по относительному пути."""
         sql_path = self.BASE_DIR / relative_path
         if not sql_path.exists():
             raise FileNotFoundError(f"SQL файл не найден: {sql_path}")
@@ -171,10 +142,7 @@ class DBPostgresqlGradio:
         except SQLAlchemyError as e:
             logger.error(f"Ошибка при выполнении SQL файла {relative_path}: {e}")
             raise
-
-    # ===============================================================
-    # 🔹 2. РЕКУРСИВНОЕ ИЗВЛЕЧЕНИЕ ДЕРЕВА (оставлено без изменений)
-    # ===============================================================
+    # 2. РЕКУРСИВНОЕ ИЗВЛЕЧЕНИЕ ДЕРЕВА (оставлено без изменений)
     def check_tables(self):
         sql = """
         SELECT table_name 
@@ -262,10 +230,7 @@ class DBPostgresqlGradio:
         # Корневые узлы должны быть в правильном порядке
         root_nodes.reverse()
         return root_nodes
-
-    # ===============================================================
-    # 🔹 3. ЗАГРУЗКА JSON-ФАЙЛА В ТАБЛИЦУ
-    # ===============================================================
+    # 3. ЗАГРУЗКА JSON-ФАЙЛА В ТАБЛИЦУ
     def load_json_to_tree(self, relative_json_path: str):
         """
         Загружает JSON дерево в таблицу prompt_tree.
@@ -308,10 +273,6 @@ class DBPostgresqlGradio:
             logger.error(f"Ошибка при загрузке JSON дерева: {e}")
             raise
 
-# ---------------------------------------------------------------------
-# НИЖЕ (в твоём файле) у тебя уже был код для инициализации экземпляра db.
-# Я оставляю это поведение — он создаёт объект db и вызывает check_tables.
-# ---------------------------------------------------------------------
 try:
     db = DBPostgresqlGradio(
         Config.DB_NAME,

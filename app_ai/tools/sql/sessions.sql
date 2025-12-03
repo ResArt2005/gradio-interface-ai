@@ -1,5 +1,5 @@
-CREATE TABLE sessions (
-    session_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+CREATE TABLE IF NOT EXISTS sessions (
+    session_id BIGSERIAL PRIMARY KEY,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     last_activity TIMESTAMP NOT NULL DEFAULT NOW(),
     user_ip INET,
