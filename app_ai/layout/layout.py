@@ -1,5 +1,5 @@
 import gradio as gr
-from events.bindings import bind_events
+from bindings.bindings import bind_events
 from static.load_static import *
 from ui.UI import UI
 from frontend.user_elements import (
