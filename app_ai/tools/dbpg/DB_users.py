@@ -1,7 +1,6 @@
 import uuid
 from pathlib import Path
 from tools.dbpg.DBPostgresqlGradio import db
-
 MEDIA_DIR = Path("/app/media")
 
 
@@ -71,3 +70,4 @@ def replace_user_avatar(user_id: int, new_file_bytes: bytes | None, extension: s
     save_image_path_to_db(user_id, new_path)
 
     return new_path
+

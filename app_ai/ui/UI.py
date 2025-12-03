@@ -4,8 +4,15 @@ from typing import List, Dict, Optional
 
 
 class UI:
-    # ----- Основные элементы -----
+    # ----- Главный элемент -----
     interface: Optional[gr.Blocks] = None
+    # ----- Страницы -----
+    # ----- Главная панель -----
+    main_panel: Optional[gr.Column] = None
+    # ----- Настройки -----
+    settings_panel: Optional[gr.Column] = None
+    # ----- Панель авторизации -----
+    login_panel: Optional[gr.Column] = None
     # ----- Чат -----
     chat_list: Optional[gr.Radio] = None
     new_chat_btn: Optional[gr.Button] = None
@@ -29,7 +36,6 @@ class UI:
 
     # Авторизация
     login_panel: Optional[gr.Column] = None
-    main_panel: Optional[gr.Column] = None
     login_user: Optional[gr.Textbox] = None
     login_password: Optional[gr.Textbox] = None
     login_btn: Optional[gr.Button] = None
@@ -43,6 +49,14 @@ class UI:
     last_name: Optional[gr.State] = None
     first_name: Optional[gr.State] = None
     surname: Optional[gr.State] = None
+    current_password_txt: Optional[gr.State] = None
+    new_password_txt: Optional[gr.State] = None
+    confirm_new_password_txt: Optional[gr.State] = None
+    password_change_btn: Optional[gr.Button] = None
+    FIO_change_btn: Optional[gr.Button] = None
+    email_change_btn: Optional[gr.Button] = None
+    back_to_main_btn: Optional[gr.Button] = None
+    open_settings_btn: Optional[gr.Button] = None
     # ----- Аватар -----
     avatar_preview: Optional[gr.Image] = None
     avatar_upload: Optional[gr.File] = None

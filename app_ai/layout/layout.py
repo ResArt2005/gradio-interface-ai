@@ -2,8 +2,8 @@ import gradio as gr
 from events.bindings import bind_events
 from static.load_static import *
 from ui.UI import UI
-from frontend.user_auth import (
-    authenticate_user, logout_user
+from frontend.user_elements import (
+    authenticate_user, logout_user, open_settings_panel
 )
 from frontend.chat import (
     chat_list_column, chatbot_column
@@ -11,7 +11,7 @@ from frontend.chat import (
 from frontend.unseen_elements import (
     initialize_unseen_ui
 )
-from frontend.avatar_settings_block import ( avatar_settings_block
+from frontend.settings_element import ( avatar_settings_block, email_settings_block, FIO_block, change_password_block, back_to_main_panel_button
 )
 # Основной layout
 def build_interface():
@@ -40,15 +40,22 @@ def build_interface():
         authenticate_user(ui)
         # Скрытые элементы для логики
         initialize_unseen_ui(ui)
-        # Основная панель (пока скрыта)
+        # Основная панель
         with gr.Column(visible=False, elem_id="main_panel") as ui.main_panel:
-            logout_user(ui)
-            avatar_settings_block(ui)
+            with gr.Row():
+                logout_user(ui)
+                open_settings_panel(ui)
             with gr.Row():
                 # Левая колонка (список чатов)
                 chat_list_column(ui)
                 # Правая колонка (чат)
                 chatbot_column(ui)
+        with gr.Column(visible=False, elem_id="settings_panel") as ui.settings_panel:
+            avatar_settings_block(ui)
+            email_settings_block(ui)
+            FIO_block(ui)
+            change_password_block(ui)
+            back_to_main_panel_button(ui)
         # Привязка событий
         bind_events(ui)
 

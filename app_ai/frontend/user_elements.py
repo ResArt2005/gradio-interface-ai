@@ -12,3 +12,8 @@ def logout_user(ui: UI):
     with gr.Row():
         ui.btn_logout = gr.Button(value="Выйти", variant="secondary", elem_id="btn_logout")
         gr.Markdown("")
+
+def open_settings_panel(ui: UI):
+    with gr.Row():
+        ui.open_settings_btn = gr.Button(value="Открыть настройки", variant="secondary", elem_id="btn_open_settings")
+        gr.Markdown("")

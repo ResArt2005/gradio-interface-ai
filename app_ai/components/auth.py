@@ -1,7 +1,7 @@
 from tools.debug import logger
 import gradio as gr
 from tools.dbpg.DBPostgresqlGradio import db
-from components.avatar_manager import get_user_avatar_path
+from components.user_manager import get_user_avatar_path
 def on_login_click(username, password):
             if not username or not password:
                 return "Введите логин и пароль", gr.update(), gr.update(), gr.update(visible=True), gr.update(visible=False)
