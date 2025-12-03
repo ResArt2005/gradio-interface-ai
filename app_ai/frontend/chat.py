@@ -18,6 +18,7 @@ def chat_list_column(ui: UI):
         )
         open_settings_panel(ui)
         logout_user(ui)
+
 def chatbot_column(ui: UI):
     # Правая колонка (чат)
     with gr.Column(scale=4):
