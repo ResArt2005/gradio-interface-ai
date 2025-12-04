@@ -16,7 +16,8 @@ def auth_btns(ui: UI):
             ui.avatar_preview,
             ui.first_name,
             ui.last_name,
-            ui.surname
+            ui.surname,
+            ui.e_mail
         ]
     )
     #  LOGOUT
@@ -34,6 +35,7 @@ def auth_btns(ui: UI):
             ui.avatar_upload,
             ui.first_name,
             ui.last_name,
-            ui.surname
+            ui.surname,
+            ui.e_mail
         ]
     )

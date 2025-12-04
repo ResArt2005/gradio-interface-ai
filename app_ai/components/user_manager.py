@@ -1,5 +1,5 @@
 import gradio as gr
-from tools.dbpg.DB_users import replace_user_avatar, get_user_avatar_path, change_user_fio, get_user_fio
+from tools.dbpg.DB_users import replace_user_avatar, get_user_avatar_path, change_user_fio, change_user_email, is_uniqe_email
 from tools.debug import logger
 def on_avatar_change(file: str, user_id: int):
     if not user_id:
@@ -38,6 +38,16 @@ def fio_change(first_name: str, last_name: str, surname:str, user_id: int):
     logger.info("ФИО обновлено для user_id=%s -> %s", user_id, f"{last_name} {first_name} {surname if surname else ''}")
     return gr.update(first_name), gr.update(last_name), gr.update(surname), "Актуальное ФИО сохранено"
 
+def email_change(e_mail: str, user_id: int):
+    if not user_id:
+        return gr.update(''), "Ошибка: пользователь не авторизован"
+    if not e_mail or "@" not in e_mail:
+        return gr.update(''), "Ошибка: Некорректный email"
+    if is_uniqe_email(e_mail, user_id) is False:
+        return gr.update(''), "Ошибка: Этот email уже используется"
+    change_user_email(user_id, e_mail)
+    logger.info("Email обновлен для user_id=%s -> %s", user_id, e_mail)
+    return gr.update(e_mail), "Актуальный email сохранен"
 
 def open_settings_panel():
     return gr.update(visible=False), gr.update(visible=True)

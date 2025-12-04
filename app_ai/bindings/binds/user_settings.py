@@ -1,4 +1,4 @@
-from components.user_manager import on_avatar_change, fio_change, open_settings_panel, back_to_main_panel
+from components.user_manager import on_avatar_change, fio_change, open_settings_panel, back_to_main_panel, email_change
 from ui.UI import UI
     
 
@@ -28,4 +28,11 @@ def fio_change_btn(ui: UI):
         fio_change,
         inputs=[ui.first_name, ui.last_name, ui.surname, ui.current_user_id],
         outputs=[ui.first_name, ui.last_name, ui.surname, ui.status_message]
+    )
+
+def email_change_btn(ui: UI):
+    ui.email_change_btn.click(
+        email_change,
+        inputs=[ui.e_mail, ui.current_user_id],
+        outputs=[ui.e_mail, ui.status_message]
     )

@@ -116,25 +116,37 @@ def change_user_fio(user_id: int, first_name: str, last_name: str, surname: str 
 def get_user_email(user_id: int) -> str | None:
     """Получить email пользователя из базы данных."""
     sql = f"""
-        SELECT email
+        SELECT e_mail
         FROM users
         WHERE user_id = {user_id};
     """
     result = db.select(sql)
     if result and result[0][0]:
         return result[0][0]
-    return None
+    return ''
 
 def change_user_email(user_id: int, new_email: str):
     """Обновить email пользователя в базе данных."""
     sql = f"""
         UPDATE users
-        SET email = '{new_email}'
+        SET e_mail = '{new_email}'
         WHERE user_id = {user_id};
     """
     db.insert(sql)
 
-# 0. НОВЫЕ МЕТОДЫ ДЛЯ АУТЕНТИФИКАЦИИ / ПОЛЬЗОВАТЕЛЕЙ
+def is_uniqe_email(email: str, user_id: int) -> bool:
+    """Проверить, что e_mail уникален среди всех пользователей, кроме текущего."""
+    sql = f"""
+        SELECT COUNT(*)
+        FROM users
+        WHERE e_mail = '{email}' AND user_id != {user_id};
+    """
+    result = db.select(sql)
+    if result and result[0][0] == 0:
+        return True
+    return False
+
+# МЕТОДЫ ДЛЯ АУТЕНТИФИКАЦИИ И УПРАВЛЕНИЯ ПОЛЬЗОВАТЕЛЯМИ
 def hash_password(plain_password: str) -> str:
     if isinstance(plain_password, str):
         plain_password = plain_password.encode("utf-8")
@@ -162,10 +174,6 @@ def get_user_by_username(username: str) -> Optional[Dict[str, Any]]:
         return None
 
 def create_user(username: str, plain_password: str) -> int:
-    """
-    Создаёт пользователя в таблице users (хэширует пароль).
-    Возвращает user_id нового пользователя.
-    """
     password_hash = hash_password(plain_password)
     sql_check = text("SELECT user_id FROM users WHERE username = :username")
     sql_insert = text("""

@@ -167,3 +167,8 @@ body.resizing-chat {
 #gr_rename_chat, #gr_burger, #gr_rename_box, #gr_delete_chat{
   display: none!important;
 }
+
+/* Скрывает базовый футер градио*/
+footer[class='svelte-czcr5b']{
+  display:none!important;
+}
