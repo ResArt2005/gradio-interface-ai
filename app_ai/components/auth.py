@@ -4,12 +4,12 @@ from tools.dbpg.DBPostgresqlGradio import db
 from tools.dbpg.DB_users import get_user_avatar_path, get_user_fio, save_client_ip, verify_user_credentials, update_last_login, get_user_email
 def on_login_click(username, password, request: gr.Request):
     if not username or not password:
-        return "Введите логин и пароль", gr.update(), gr.update(), gr.update(visible=True), gr.update(visible=False), gr.update(), gr.update(), gr.update(), gr.update()
+        return "Введите логин и пароль", gr.update(), gr.update(), gr.update(visible=True), gr.update(visible=False), gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
     try:
         user_id = verify_user_credentials(username, password)
         if user_id is None:
             logger.info(f"Failed login for {username}")
-            return "Неверный логин или пароль", gr.update(), gr.update(), gr.update(visible=True), gr.update(visible=False), gr.update(), gr.update(), gr.update(), gr.update()
+            return "Неверный логин или пароль", gr.update(), gr.update(), gr.update(visible=True), gr.update(visible=False), gr.update(), gr.update(), gr.update(), gr.update(), gr.update()
         # Успешный вход
         ip = request.headers.get("x-forwarded-for", request.client.host)
         save_client_ip(user_id, ip)
