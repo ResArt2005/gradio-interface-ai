@@ -164,6 +164,15 @@ def verify_password_hash(plain_password: str, password_hash: str) -> bool:
         logger.error(f"verify_password_hash error: {e}")
         return False
 
+def save_password(user_id: int, plain_password: str):
+    password_hash = hash_password(plain_password)
+    sql = f"""
+        UPDATE users
+        SET password_hash = '{password_hash}'
+        WHERE user_id = {user_id};
+    """
+    db.insert(sql)
+
 # ----- CRUD для пользователей -----
 def get_user_by_username(username: str) -> Optional[Dict[str, Any]]:
     sql = text("SELECT user_id, username, password_hash, created_at, last_login FROM users WHERE username = :username")
@@ -172,7 +181,13 @@ def get_user_by_username(username: str) -> Optional[Dict[str, Any]]:
         if res:
             return dict(res)
         return None
-
+def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
+    sql = text("SELECT user_id, username, password_hash, created_at, last_login FROM users WHERE user_id = :user_id")
+    with db.engine.connect() as conn:
+        res = conn.execute(sql, {"user_id": user_id}).mappings().first()
+        if res:
+            return dict(res)
+        return None
 def create_user(username: str, plain_password: str) -> int:
     password_hash = hash_password(plain_password)
     sql_check = text("SELECT user_id FROM users WHERE username = :username")

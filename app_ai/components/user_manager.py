@@ -1,5 +1,5 @@
 import gradio as gr
-from tools.dbpg.DB_users import replace_user_avatar, get_user_avatar_path, change_user_fio, change_user_email, is_uniqe_email
+from tools.dbpg.DB_users import replace_user_avatar, get_user_avatar_path, change_user_fio, change_user_email, is_uniqe_email, verify_password_hash, save_password, get_user_by_id
 from tools.debug import logger
 def on_avatar_change(file: str, user_id: int):
     if not user_id:
@@ -48,6 +48,23 @@ def email_change(e_mail: str, user_id: int):
     change_user_email(user_id, e_mail)
     logger.info("Email обновлен для user_id=%s -> %s", user_id, e_mail)
     return gr.update(e_mail), "Актуальный email сохранен"
+
+def password_change(current_password: str, new_password: str, confirm_new_password_txt:str, user_id: int):
+    if not user_id:
+        return "Ошибка: пользователь не авторизован", '', '', ''
+    user = get_user_by_id(user_id)
+    if not user:
+        return "Ошибка: пользователь не найден", '', '', ''
+    
+    if not verify_password_hash(current_password, user['password_hash']):
+        return "Ошибка: Текущий пароль неверен", current_password, new_password, confirm_new_password_txt
+    if len(new_password) < 6:
+        return "Ошибка: Новый пароль должен быть не менее 6 символов", current_password, new_password, confirm_new_password_txt
+    if new_password != confirm_new_password_txt:
+        return "Ошибка: Новый пароль и подтверждение не совпадают", current_password, new_password, confirm_new_password_txt
+    save_password(user_id, new_password)
+    logger.info("Пароль обновлен для user_id=%s", user_id)
+    return "Пароль успешно изменен", '', '', ''
 
 def open_settings_panel():
     return gr.update(visible=False), gr.update(visible=True)

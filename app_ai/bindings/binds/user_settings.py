@@ -1,4 +1,4 @@
-from components.user_manager import on_avatar_change, fio_change, open_settings_panel, back_to_main_panel, email_change
+from components.user_manager import on_avatar_change, fio_change, password_change, open_settings_panel, back_to_main_panel, email_change
 from ui.UI import UI
     
 
@@ -35,4 +35,11 @@ def email_change_btn(ui: UI):
         email_change,
         inputs=[ui.e_mail, ui.current_user_id],
         outputs=[ui.e_mail, ui.status_message]
+    )
+
+def password_change_btn(ui: UI):
+    ui.password_change_btn.click(
+        password_change,
+        inputs=[ui.current_password_txt, ui.new_password_txt, ui.confirm_new_password_txt, ui.current_user_id],
+        outputs=[ui.status_message, ui.current_password_txt, ui.new_password_txt, ui.confirm_new_password_txt]
     )
