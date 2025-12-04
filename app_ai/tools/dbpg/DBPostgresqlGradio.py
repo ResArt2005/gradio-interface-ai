@@ -6,9 +6,6 @@ import json
 from config.config import Config
 from tools.debug import logger
 
-# Добавляем bcrypt для хэширования паролей
-import bcrypt
-from typing import Optional, Dict, Any
 
 class DBPostgresqlGradio:
     """sqlalchemy + psycopg[binary] — MIT License"""
@@ -49,82 +46,6 @@ class DBPostgresqlGradio:
         with self.engine.connect() as conn:
             result = conn.execute(text(sql))
             return [dict(row._mapping) for row in result.fetchall()]
-
-    # 0. НОВЫЕ МЕТОДЫ ДЛЯ АУТЕНТИФИКАЦИИ / ПОЛЬЗОВАТЕЛЕЙ
-    def hash_password(self, plain_password: str) -> str:
-        if isinstance(plain_password, str):
-            plain_password = plain_password.encode("utf-8")
-        hashed = bcrypt.hashpw(plain_password, bcrypt.gensalt())
-        return hashed.decode("utf-8")
-
-    def verify_password_hash(self, plain_password: str, password_hash: str) -> bool:
-        try:
-            if isinstance(plain_password, str):
-                plain_password = plain_password.encode("utf-8")
-            if isinstance(password_hash, str):
-                password_hash = password_hash.encode("utf-8")
-            return bcrypt.checkpw(plain_password, password_hash)
-        except Exception as e:
-            logger.error(f"verify_password_hash error: {e}")
-            return False
-
-    # ----- CRUD для пользователей -----
-    def get_user_by_username(self, username: str) -> Optional[Dict[str, Any]]:
-        sql = text("SELECT user_id, username, password_hash, created_at, last_login FROM users WHERE username = :username")
-        with self.engine.connect() as conn:
-            res = conn.execute(sql, {"username": username}).mappings().first()
-            if res:
-                return dict(res)
-            return None
-
-    def create_user(self, username: str, plain_password: str) -> int:
-        """
-        Создаёт пользователя в таблице users (хэширует пароль).
-        Возвращает user_id нового пользователя.
-        """
-        password_hash = self.hash_password(plain_password)
-        sql_check = text("SELECT user_id FROM users WHERE username = :username")
-        sql_insert = text("""
-            INSERT INTO users (username, password_hash)
-            VALUES (:username, :password_hash)
-            RETURNING user_id
-        """)
-        with self.engine.begin() as conn:
-            exists = conn.execute(sql_check, {"username": username}).first()
-            if exists:
-                raise ValueError(f"User '{username}' already exists (user_id={exists[0]}).")
-            res = conn.execute(sql_insert, {"username": username, "password_hash": password_hash}).first()
-            user_id = res[0]
-            logger.info(f"Created user '{username}' id={user_id}")
-            return user_id
-
-    def remove_user_by_username(self, username: str) -> None:
-        """
-        Удаляет пользователя по username. Благодаря ON DELETE CASCADE удалятся связанные чаты/сообщения.
-        """
-        sql = text("DELETE FROM users WHERE username = :username")
-        with self.engine.begin() as conn:
-            conn.execute(sql, {"username": username})
-            logger.info(f"Removed user '{username}' (if existed).")
-
-    def verify_user_credentials(self, username: str, plain_password: str) -> Optional[int]:
-        user = self.get_user_by_username(username)
-        if not user:
-            logger.debug(f"verify_user_credentials: user '{username}' not found")
-            return None
-        if not user.get("password_hash"):
-            logger.warning(f"User {username} has no password_hash stored")
-            return None
-        ok = self.verify_password_hash(plain_password, user["password_hash"])
-        if ok:
-            return user["user_id"]
-        return None
-
-    def update_last_login(self, user_id: int):
-        sql = text("UPDATE users SET last_login = NOW() WHERE user_id = :user_id")
-        with self.engine.begin() as conn:
-            conn.execute(sql, {"user_id": user_id})
-            logger.info(f"Updated last_login for user_id={user_id}")
     # ВЫПОЛНЕНИЕ SQL-ФАЙЛА
     def execute_sql_file(self, relative_path: str):
         """Выполнить SQL-файл по относительному пути."""
@@ -141,7 +62,7 @@ class DBPostgresqlGradio:
             logger.success(f"SQL файл выполнен успешно: {relative_path}")
         except SQLAlchemyError as e:
             logger.error(f"Ошибка при выполнении SQL файла {relative_path}: {e}")
-            raise
+            raise  
     # 2. РЕКУРСИВНОЕ ИЗВЛЕЧЕНИЕ ДЕРЕВА (оставлено без изменений)
     def check_tables(self):
         sql = """

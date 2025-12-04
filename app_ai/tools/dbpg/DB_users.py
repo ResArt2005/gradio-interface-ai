@@ -1,6 +1,13 @@
 import uuid
 from pathlib import Path
 from tools.dbpg.DBPostgresqlGradio import db
+from tools.debug import logger
+import bcrypt
+from sqlalchemy import create_engine, text
+from sqlalchemy.exc import SQLAlchemyError
+# Добавляем bcrypt для хэширования паролей
+import bcrypt
+from typing import Optional, Dict, Any
 MEDIA_DIR = Path("/app/media")
 
 # Получение IP адреса пользователя
@@ -104,3 +111,101 @@ def change_user_fio(user_id: int, first_name: str, last_name: str, surname: str 
         WHERE user_id = {user_id};
     """
     db.insert(sql)
+
+# Работа с email пользователя
+def get_user_email(user_id: int) -> str | None:
+    """Получить email пользователя из базы данных."""
+    sql = f"""
+        SELECT email
+        FROM users
+        WHERE user_id = {user_id};
+    """
+    result = db.select(sql)
+    if result and result[0][0]:
+        return result[0][0]
+    return None
+
+def change_user_email(user_id: int, new_email: str):
+    """Обновить email пользователя в базе данных."""
+    sql = f"""
+        UPDATE users
+        SET email = '{new_email}'
+        WHERE user_id = {user_id};
+    """
+    db.insert(sql)
+
+# 0. НОВЫЕ МЕТОДЫ ДЛЯ АУТЕНТИФИКАЦИИ / ПОЛЬЗОВАТЕЛЕЙ
+def hash_password(plain_password: str) -> str:
+    if isinstance(plain_password, str):
+        plain_password = plain_password.encode("utf-8")
+    hashed = bcrypt.hashpw(plain_password, bcrypt.gensalt())
+    return hashed.decode("utf-8")
+
+def verify_password_hash(plain_password: str, password_hash: str) -> bool:
+    try:
+        if isinstance(plain_password, str):
+            plain_password = plain_password.encode("utf-8")
+        if isinstance(password_hash, str):
+            password_hash = password_hash.encode("utf-8")
+        return bcrypt.checkpw(plain_password, password_hash)
+    except Exception as e:
+        logger.error(f"verify_password_hash error: {e}")
+        return False
+
+# ----- CRUD для пользователей -----
+def get_user_by_username(username: str) -> Optional[Dict[str, Any]]:
+    sql = text("SELECT user_id, username, password_hash, created_at, last_login FROM users WHERE username = :username")
+    with db.engine.connect() as conn:
+        res = conn.execute(sql, {"username": username}).mappings().first()
+        if res:
+            return dict(res)
+        return None
+
+def create_user(username: str, plain_password: str) -> int:
+    """
+    Создаёт пользователя в таблице users (хэширует пароль).
+    Возвращает user_id нового пользователя.
+    """
+    password_hash = hash_password(plain_password)
+    sql_check = text("SELECT user_id FROM users WHERE username = :username")
+    sql_insert = text("""
+        INSERT INTO users (username, password_hash)
+        VALUES (:username, :password_hash)
+        RETURNING user_id
+    """)
+    with db.engine.begin() as conn:
+        exists = conn.execute(sql_check, {"username": username}).first()
+        if exists:
+            raise ValueError(f"User '{username}' already exists (user_id={exists[0]}).")
+        res = conn.execute(sql_insert, {"username": username, "password_hash": password_hash}).first()
+        user_id = res[0]
+        logger.info(f"Created user '{username}' id={user_id}")
+        return user_id
+
+def remove_user_by_username(username: str) -> None:
+    """
+    Удаляет пользователя по username. Благодаря ON DELETE CASCADE удалятся связанные чаты/сообщения.
+    """
+    sql = text("DELETE FROM users WHERE username = :username")
+    with db.engine.begin() as conn:
+        conn.execute(sql, {"username": username})
+        logger.info(f"Removed user '{username}' (if existed).")
+
+def verify_user_credentials(username: str, plain_password: str) -> Optional[int]:
+    user = get_user_by_username(username)
+    if not user:
+        logger.debug(f"verify_user_credentials: user '{username}' not found")
+        return None
+    if not user.get("password_hash"):
+        logger.warning(f"User {username} has no password_hash stored")
+        return None
+    ok = verify_password_hash(plain_password, user["password_hash"])
+    if ok:
+        return user["user_id"]
+    return None
+
+def update_last_login(user_id: int):
+    sql = text("UPDATE users SET last_login = NOW() WHERE user_id = :user_id")
+    with db.engine.begin() as conn:
+        conn.execute(sql, {"user_id": user_id})
+        logger.info(f"Updated last_login for user_id={user_id}")
