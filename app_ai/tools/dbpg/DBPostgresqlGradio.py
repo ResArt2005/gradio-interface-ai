@@ -17,9 +17,7 @@ class DBPostgresqlGradio:
         self.connection_url = f"postgresql+psycopg://{user}:{password}@{host}:{port}/{dbname}"
         self.engine = create_engine(self.connection_url)
 
-    # ===============================================================
-    # 🔹 БАЗОВЫЕ МЕТОДЫ
-    # ===============================================================
+    # БАЗОВЫЕ МЕТОДЫ
 
     def select(self, sql: str):
         """Выполнить SELECT и вернуть список кортежей."""
@@ -62,8 +60,9 @@ class DBPostgresqlGradio:
             logger.success(f"SQL файл выполнен успешно: {relative_path}")
         except SQLAlchemyError as e:
             logger.error(f"Ошибка при выполнении SQL файла {relative_path}: {e}")
-            raise  
-    # 2. РЕКУРСИВНОЕ ИЗВЛЕЧЕНИЕ ДЕРЕВА (оставлено без изменений)
+            raise
+      
+    # Проверка, какие таблицы есть в базе
     def check_tables(self):
         sql = """
         SELECT table_name 
@@ -73,6 +72,7 @@ class DBPostgresqlGradio:
         tables = self.select_as_dict(sql)
         logger.info(f"Таблицы в БД: {[t['table_name'] for t in tables]}")
 
+    # Рекурсивное извлечение дерева быстрых запросов
     def get_tree_as_json(self):
         """
         Извлекает дерево из таблицы tree_nodes и возвращает его в виде JSON:
@@ -151,7 +151,7 @@ class DBPostgresqlGradio:
         # Корневые узлы должны быть в правильном порядке
         root_nodes.reverse()
         return root_nodes
-    # 3. ЗАГРУЗКА JSON-ФАЙЛА В ТАБЛИЦУ
+    # Загрузка JSON файла дерева быстрых запросов в таблицу
     def load_json_to_tree(self, relative_json_path: str):
         """
         Загружает JSON дерево в таблицу prompt_tree.
