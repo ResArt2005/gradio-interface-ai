@@ -2,7 +2,7 @@ import gradio as gr
 import uuid
 from tools.debug import logger
 from tools.dbpg.DB_chats import save_new_chat, delete_chat_from_bd, rename_chat_in_bd
-
+from tools.dbpg.DB_messages import save_message 
 # --- Синхронизация списка чатов ---
 def sync_chat_list(chat_titles, current_chat_id):
     if not chat_titles:
@@ -10,25 +10,35 @@ def sync_chat_list(chat_titles, current_chat_id):
     return gr.update(choices=build_choices(chat_titles), value=current_chat_id)
 
 # --- Добавление сообщения ---
-def add_user_message(message, chat_id, chat_sessions, chat_titles):
-    # Если чатов нет, создаем новый чат с тем же chat_id
+def add_user_message(message, chat_id, chat_sessions, chat_titles, user_id=None, session_id=None):
+    """
+    Добавить сообщение от пользователя в chat_sessions и в БД.
+    Новая сигнатура принимает user_id и session_id (optional).
+    Возвращает tuple, совместимый с тем, что ожидает bindings/layout.
+    """
+    # Если чатов нет, создаём новый (локально) — как и раньше
     if chat_id not in chat_sessions:
         chat_sessions[chat_id] = []
         chat_title = message[:30] + "..." if len(message) > 30 else message
         chat_titles[chat_id] = chat_title
-        logger.info(f"Создан новый чат: {chat_title} {chat_id}")
-    
-    # Добавляем сообщение пользователя
+
+    # Добавляем сообщение пользователя в память
     user_msg = {"role": "user", "content": message}
     chat_sessions[chat_id].append(user_msg)
-    logger.info(f"Сообщение от пользователя: {message}")
-    logger.info(f"Текущий чат {chat_titles[chat_id]} {chat_id}")
+
+    # Сохраняем в БД: если user_id не передан, сохраняем с NULL user_id
+    try:
+        save_message(chat_id=chat_id, user_id=user_id, role='user', content=message, session_id=session_id)
+    except Exception as e:
+        # Не фатальная ошибка: логируем и продолжаем
+        from tools.debug import logger
+        logger.error(f"Failed to save user message to DB: {e}")
 
     return (
         gr.update(value="", autofocus=True),
-        chat_sessions[chat_id],
-        chat_sessions,
-        chat_titles,
+        chat_sessions[chat_id],  # content for chatbot
+        chat_sessions,           # updated state
+        chat_titles,             # updated state
         gr.update(choices=build_choices(chat_titles), value=chat_id)
     )
 
@@ -37,7 +47,8 @@ def build_choices(chat_titles: dict):
 
 
 # --- Новый чат ---
-def new_chat(chat_sessions, chat_titles, user_id):
+def new_chat(chat_sessions, chat_titles, user_id, session_id=None):
+    # unchanged logic but pass session_id if you want to create initial message later
     new_id = str(uuid.uuid4())
     chat_sessions[new_id] = []
 
@@ -48,7 +59,9 @@ def new_chat(chat_sessions, chat_titles, user_id):
         i += 1
     chat_titles[new_id] = f"{base} {i}"
 
-    save_new_chat(new_id, chat_titles[new_id], user_id)
+    # Save chat in DB (unchanged)
+    from tools.dbpg.DB_chats import save_new_chat
+    save_new_chat(new_id, chat_titles[new_id], user_id, session_id)
     logger.success(f"Создан новый чат {chat_titles[new_id]} {new_id}")
 
     return (

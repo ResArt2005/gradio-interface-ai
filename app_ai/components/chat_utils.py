@@ -1,8 +1,9 @@
+from tools.dbpg.DB_messages import save_message
+from tools.debug import logger
 import requests
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import os
-from tools.debug import logger
 FASTAPI_URL = "http://host.docker.internal:8000/query"
 
 # --- Форматирование сообщений ---
@@ -21,7 +22,12 @@ def clear_current_chat(chat_id, chat_sessions):
     return [], chat_sessions
 
 # --- Получение ответа от LLM ---
-def fetch_llm_answer(_, chat_id, chat_sessions):
+def fetch_llm_answer(_, chat_id, chat_sessions, user_id=None, session_id=None):
+    """
+    Генерирует ответ (в тестовом виде или через FASTAPI), сохраняет ответ ассистента в БД,
+    и возвращает обновлённую историю для chat_id и весь chat_sessions.
+    Новая сигнатура: принимает user_id и session_id (опционально).
+    """
     if chat_id not in chat_sessions:
         return [{"role": "assistant", "content": "Ошибка: Чат не найден."}], chat_sessions
 
@@ -33,13 +39,15 @@ def fetch_llm_answer(_, chat_id, chat_sessions):
         answer = data.get('answer', 'Ответ не получен')
         sources = data.get('sources', [])
     except Exception as e:
-        #answer = f'Ошибка запроса: {e}'
         last_user_msg = history[-1]['content'].split(']:\n\n', 1)[-1]
         answer = f'Тестовый ответ от LLM на сообщение "{last_user_msg}"'
         logger.info(answer)
         sources = []
 
-    formatted = format_message('assistant', answer)
+    # Форматируем как раньше (оставляем HTML/детали)
+    tz = os.getenv("TZ", "UTC")
+    time_str = datetime.now(ZoneInfo(tz)).strftime("%H:%M:%S")
+    formatted = f"🤖 **Ассистент** [{time_str}]:\n\n{answer}"
     if sources:
         formatted += '\n\n<details><summary>📎 <b>Источники</b></summary>\n\n'
         for i, src in enumerate(sources, 1):
@@ -51,5 +59,12 @@ def fetch_llm_answer(_, chat_id, chat_sessions):
             formatted += f'  > {snippet.strip()}\n\n'
         formatted += '</details>'
 
-    chat_sessions[chat_id].append({'role': 'assistant', 'content': formatted})
+    # Сохраняем ассистентское сообщение в память и в БД
+    assistant_msg = {'role': 'assistant', 'content': formatted}
+    chat_sessions[chat_id].append(assistant_msg)
+    try:
+        save_message(chat_id=chat_id, user_id=user_id, role='assistant', content=formatted, session_id=session_id)
+    except Exception as e:
+        logger.error(f"Failed to save assistant message to DB: {e}")
+
     return chat_sessions[chat_id], chat_sessions

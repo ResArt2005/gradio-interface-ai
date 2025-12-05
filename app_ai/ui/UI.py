@@ -45,6 +45,7 @@ class UI:
     authenticated: Optional[gr.State] = None
     current_user_id: Optional[gr.State] = None
     current_user_ip: Optional[gr.State] = None
+    current_session_id: Optional[gr.State] = None
     e_mail: Optional[gr.State] = None
     last_name: Optional[gr.State] = None
     first_name: Optional[gr.State] = None

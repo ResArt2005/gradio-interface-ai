@@ -9,8 +9,8 @@ from tools.dbpg.DB_users import (
     get_user_email
 )
 from tools.dbpg.DB_chats import download_chats_for_user
+from tools.dbpg.DB_messages import create_session, load_messages_for_user_chats
 from components.chat_list import build_choices
-
 
 def on_login_click(username, password, request: gr.Request):
     if not username or not password:
@@ -23,7 +23,8 @@ def on_login_click(username, password, request: gr.Request):
             gr.update(), gr.update(), gr.update(),
             gr.update(), gr.update(None),
             gr.update(None),
-            gr.update(None)
+            gr.update(None),
+            gr.update(None)  # <-- session_id slot (see binding notes)
         )
 
     try:
@@ -37,6 +38,7 @@ def on_login_click(username, password, request: gr.Request):
                 gr.update(visible=False),
                 gr.update(), gr.update(), gr.update(),
                 gr.update(), gr.update(None),
+                gr.update(None),
                 gr.update(None),
                 gr.update(None)
             )
@@ -54,8 +56,16 @@ def on_login_click(username, password, request: gr.Request):
         e_mail = get_user_email(user_id)
 
         # Загружаем чаты
-        chat_titles = download_chats_for_user(user_id)
-        chat_sessions = {cid: [] for cid in chat_titles}  # ПУСТЫЕ истории
+        chat_titles = download_chats_for_user(user_id)           # {chat_id_str: title}
+        chat_ids = list(chat_titles.keys())
+
+        # Создаём session и подготавливаем истории (подгружаем все сообщения по каждому чату)
+        session_id = create_session(user_id, user_ip=ip, extra=None)
+        chat_sessions = load_messages_for_user_chats(chat_ids)   # {chat_id: [ {role,content,...}, ... ] }
+
+        # Приводим к структуре, которую UI ожидает: если чата нет — пустой список
+        for cid in chat_ids:
+            chat_sessions.setdefault(cid, [])
 
         choices = build_choices(chat_titles)
 
@@ -64,8 +74,8 @@ def on_login_click(username, password, request: gr.Request):
 
         return (
             "Вход успешен",
-            gr.update(True),
-            user_id,
+            gr.update(True),      # authenticated
+            user_id,              # current_user_id
             gr.update(visible=False),
             gr.update(visible=True),
             avatar_url,
@@ -74,9 +84,10 @@ def on_login_click(username, password, request: gr.Request):
             surname,
             e_mail,
 
-            chat_sessions,          # Состояние
-            chat_titles,            # Состояние
-            gr.update(choices=choices)
+            chat_sessions,        # ui.chat_sessions (State)
+            chat_titles,          # ui.chat_titles (State)
+            gr.update(choices=choices),
+            session_id            # <-- новый: возвращаем session_id (bind to ui.current_session_id)
         )
 
     except Exception as e:
@@ -90,9 +101,10 @@ def on_login_click(username, password, request: gr.Request):
             gr.update(None),
             gr.update(''), gr.update(''), gr.update(''),
             gr.update(''),
-            gr.update(None), gr.update(None), gr.update(None)
+            gr.update(None), gr.update(None), gr.update(None),
+            gr.update(None)
         )
 
 def on_logout_click(auth_state):
     logger.info("User logged out (manual logout)")
-    return '', '', gr.update(False), gr.update(None), gr.update(visible=True), gr.update(visible=False), gr.update(None), gr.update(''), gr.update(''), gr.update(''), gr.update(''), gr.update(''), gr.update(None), gr.update(None), gr.update(None)
+    return '', '', gr.update(False), gr.update(None), gr.update(visible=True), gr.update(visible=False), gr.update(None), gr.update(''), gr.update(''), gr.update(''), gr.update(''), gr.update(''), gr.update(None), gr.update(None), gr.update(None), gr.update(None)

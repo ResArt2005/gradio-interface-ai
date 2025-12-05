@@ -12,6 +12,8 @@ def initialize_unseen_ui(ui: UI):
     ui.current_nodes = gr.State(tree)
     ui.suppress_reset = gr.State(False)
 
+    ui.current_session_id = gr.State(None)
+
     # Скрытые элементы для логики
     ui.rename_btn_gr = gr.Button(value="gr_test", elem_id="gr_rename_chat")
     ui.rename_box = gr.Textbox(placeholder="Переименовать чат", elem_id="gr_rename_box")
