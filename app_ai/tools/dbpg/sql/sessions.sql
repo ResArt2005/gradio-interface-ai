@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS sessions (
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     last_activity TIMESTAMP NOT NULL DEFAULT NOW(),
     user_ip varchar(50) NULL,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     extra JSONB
 );
 
