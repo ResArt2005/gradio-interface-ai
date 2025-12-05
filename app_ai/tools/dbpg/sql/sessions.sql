@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS sessions (
     session_id BIGSERIAL PRIMARY KEY,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     last_activity TIMESTAMP NOT NULL DEFAULT NOW(),
-    user_ip INET,
+    user_ip varchar(50) NULL,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     extra JSONB
 );

@@ -17,7 +17,11 @@ def auth_btns(ui: UI):
             ui.first_name,
             ui.last_name,
             ui.surname,
-            ui.e_mail
+            ui.e_mail,
+
+            ui.chat_sessions,
+            ui.chat_titles,
+            ui.chat_list
         ]
     )
     #  LOGOUT
@@ -36,6 +40,10 @@ def auth_btns(ui: UI):
             ui.first_name,
             ui.last_name,
             ui.surname,
-            ui.e_mail
+            ui.e_mail,
+            
+            ui.chat_sessions,
+            ui.chat_titles,
+            ui.chat_list
         ]
     )

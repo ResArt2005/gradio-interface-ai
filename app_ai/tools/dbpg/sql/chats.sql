@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS chats (
-    chat_id BIGSERIAL PRIMARY KEY,
+    chat_id uuid PRIMARY KEY,
+    user_id INTEGER REFERENCES users(user_id) ON DELETE SET NULL,
     title VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
-    extra JSONB
+    msg_count INTEGER NOT NULL DEFAULT 0
 );

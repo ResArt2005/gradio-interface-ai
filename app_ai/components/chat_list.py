@@ -1,13 +1,13 @@
 import gradio as gr
 import uuid
 from tools.debug import logger
-from tools.dbpg.DBPostgresqlGradio import db
+from tools.dbpg.DB_chats import save_new_chat, delete_chat_from_bd, rename_chat_in_bd
 # --- Утилита для построения списка кортежей (label, value) ---
 def build_choices(chat_titles: dict):
     return [(title, chat_id) for chat_id, title in chat_titles.items()]
 
 # --- Новый чат ---
-def new_chat(chat_sessions, chat_titles):
+def new_chat(chat_sessions, chat_titles, user_id):
     new_id = str(uuid.uuid4())
     chat_sessions[new_id] = []
 
@@ -19,6 +19,7 @@ def new_chat(chat_sessions, chat_titles):
         i += 1
     chat_titles[new_id] = f"{base_name} {i}"
 
+    save_new_chat(new_id, chat_titles[new_id], user_id)
     logger.success(f"Создан новый чат {chat_titles[new_id]} {new_id}")
 
     return new_id, chat_sessions, chat_titles, gr.update(
@@ -40,6 +41,7 @@ def rename_chat(new_title, current_chat_id, chat_titles):
         return gr.update(), gr.update(), ""
     logger.info(f"Переименован чат из {chat_titles[current_chat_id]} {current_chat_id} в {new_title}")
     chat_titles[current_chat_id] = new_title
+    rename_chat_in_bd(current_chat_id, new_title)
     return (
     chat_titles,
     gr.update(choices=build_choices(chat_titles), value=current_chat_id, interactive=True),
@@ -81,6 +83,7 @@ def delete_chat(current_chat_id, chat_sessions, chat_titles):
     if not current_chat_id:
         return gr.update(), chat_sessions, chat_titles, gr.update()
     logger.success(f"Удаление чата {chat_titles[current_chat_id]} {current_chat_id}.")
+    delete_chat_from_bd(current_chat_id)
     chat_sessions.pop(current_chat_id, None)
     chat_titles.pop(current_chat_id, None)
     # Новый текущий чат: последний в словаре (если есть)
