@@ -4,7 +4,6 @@ CREATE TABLE IF NOT EXISTS messages (
     user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
     chat_id uuid REFERENCES chats(chat_id) ON DELETE SET NULL,
     role VARCHAR(20) NOT NULL CHECK (role IN ('user', 'assistant', 'system', 'agent')),
-    text_msg VARCHAR(30000) NOT NULL,
     content VARCHAR(30000) NOT NULL,
     timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
     metadata JSONB
