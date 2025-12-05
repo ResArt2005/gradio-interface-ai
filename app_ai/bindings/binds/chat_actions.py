@@ -24,8 +24,8 @@ def chat_actions(ui: UI):
     ui.chat_list.change(
         switch_chat,
         [ui.chat_list, ui.chat_titles, ui.chat_sessions],
-        [ui.current_chat_id, ui.chatbot]
-    ).then(focus_textbox, [], [ui.textbox])
+        [ui.current_chat_id, ui.chatbot, ui.chat_sessions, ui.chat_titles]
+)   .then(focus_textbox, [], [ui.textbox])
     #  DELETE CHAT
     ui.delete_chat_btn.click(
         delete_chat,
