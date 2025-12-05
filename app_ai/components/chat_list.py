@@ -58,10 +58,7 @@ def new_chat(chat_sessions, chat_titles, user_id, session_id=None):
     while f"{base} {i}" in existing:
         i += 1
     chat_titles[new_id] = f"{base} {i}"
-
-    # Save chat in DB (unchanged)
-    from tools.dbpg.DB_chats import save_new_chat
-    save_new_chat(new_id, chat_titles[new_id], user_id, session_id)
+    save_new_chat(new_id, chat_titles[new_id], user_id)
     logger.success(f"Создан новый чат {chat_titles[new_id]} {new_id}")
 
     return (
