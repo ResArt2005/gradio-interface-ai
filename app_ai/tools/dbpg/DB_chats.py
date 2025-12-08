@@ -38,7 +38,7 @@ def download_chats_for_user(user_id: int) -> Dict[str, str]:
 def append_chat_log(chat_id: str, log: dict) -> None:
     # always include a timestamp if not present
     if "time" not in log:
-        log["time"] = datetime.utcnow().isoformat()
+        log["time"] = datetime.utcnow().isoformat() # datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     sql = """
         UPDATE chats
