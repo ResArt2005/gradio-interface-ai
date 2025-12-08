@@ -1,3 +1,4 @@
+from tools.dbpg.DB_chats import append_chat_log
 from tools.dbpg.DB_messages import save_message
 from tools.debug import logger
 import requests
@@ -66,5 +67,11 @@ def fetch_llm_answer(_, chat_id, chat_sessions, user_id=None, session_id=None):
         save_message(chat_id=chat_id, user_id=user_id, role='assistant', content=formatted, session_id=session_id)
     except Exception as e:
         logger.error(f"Failed to save assistant message to DB: {e}")
-
+    append_chat_log(chat_id, {
+        "event": "message",
+        "role": "assistant",
+        "chat_id": chat_id,
+        "content": answer,
+        "time": datetime.now().isoformat()
+    })
     return chat_sessions[chat_id], chat_sessions

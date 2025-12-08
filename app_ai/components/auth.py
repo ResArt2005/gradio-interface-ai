@@ -24,6 +24,7 @@ def on_login_click(username, password, request: gr.Request):
             gr.update(), gr.update(None),
             gr.update(None),
             gr.update(None),
+            gr.update(None),
             gr.update(None)  # <-- session_id slot (see binding notes)
         )
 
@@ -40,7 +41,8 @@ def on_login_click(username, password, request: gr.Request):
                 gr.update(), gr.update(None),
                 gr.update(None),
                 gr.update(None),
-                gr.update(None)
+                gr.update(None),
+                gr.update(None)  # <-- session_id slot (see binding notes)
             )
 
         # Успешный вход
@@ -107,4 +109,4 @@ def on_login_click(username, password, request: gr.Request):
 
 def on_logout_click(auth_state):
     logger.info("User logged out (manual logout)")
-    return '', '', gr.update(False), gr.update(None), gr.update(visible=True), gr.update(visible=False), gr.update(None), gr.update(''), gr.update(''), gr.update(''), gr.update(''), gr.update(''), gr.update(None), gr.update(None), gr.update(None), gr.update(None)
+    return '', '', gr.update(False), gr.update(None), gr.update(visible=True), gr.update(visible=False), gr.update(None), gr.update(''), gr.update(''), gr.update(''), gr.update(''), gr.update(''), gr.update(None), gr.update(None), gr.update(None), gr.update(None), gr.update(None)

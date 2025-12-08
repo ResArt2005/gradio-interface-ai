@@ -29,10 +29,16 @@ class DBPostgresqlGradio:
         """Выполнить SELECT и вернуть pandas DataFrame."""
         return pd.read_sql(sql, self.engine)
 
-    def insert(self, sql: str):
-        """Выполнить INSERT/UPDATE/DELETE."""
+    def insert(self, sql: str, params: dict = None):
+        """
+        Выполнить INSERT/UPDATE/DELETE.
+        Поддерживает как обычные запросы, так и параметризованные.
+        """
         with self.engine.begin() as conn:
-            conn.execute(text(sql))
+            if params:
+                conn.execute(text(sql), params)
+            else:
+                conn.execute(text(sql))
 
     def execute_without_transaction(self, sql: str):
         """Выполнить SQL без транзакции (автокоммит)."""

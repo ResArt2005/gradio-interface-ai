@@ -1,7 +1,8 @@
+from datetime import datetime
 import gradio as gr
 import uuid
 from tools.debug import logger
-from tools.dbpg.DB_chats import save_new_chat, delete_chat_from_bd, rename_chat_in_bd
+from tools.dbpg.DB_chats import append_chat_log, save_new_chat, delete_chat_from_bd, rename_chat_in_bd
 from tools.dbpg.DB_messages import save_message 
 # --- Синхронизация списка чатов ---
 def sync_chat_list(chat_titles, current_chat_id):
@@ -33,7 +34,13 @@ def add_user_message(message, chat_id, chat_sessions, chat_titles, user_id=None,
         # Не фатальная ошибка: логируем и продолжаем
         from tools.debug import logger
         logger.error(f"Failed to save user message to DB: {e}")
-
+    append_chat_log(chat_id, {
+        "event": "message",
+        "role": "user",
+        "chat_id": chat_id,
+        "content": message,
+        "time": datetime.now().isoformat()
+    })
     return (
         gr.update(value="", autofocus=True),
         chat_sessions[chat_id],  # content for chatbot
@@ -60,7 +67,15 @@ def new_chat(chat_sessions, chat_titles, user_id, session_id=None):
     chat_titles[new_id] = f"{base} {i}"
     save_new_chat(new_id, chat_titles[new_id], user_id)
     logger.success(f"Создан новый чат {chat_titles[new_id]} {new_id}")
-
+        # --- ЛОГ ---
+    append_chat_log(new_id, {
+        "event": "create_chat",
+        "chat_id": new_id,
+        "title": f"{base} {i}",
+        "user_id": user_id,
+        "session_id": session_id,
+        "time": datetime.now().isoformat()
+    })
     return (
         new_id,
         chat_sessions,
@@ -73,6 +88,12 @@ def new_chat(chat_sessions, chat_titles, user_id, session_id=None):
 def switch_chat(chat_id, chat_titles, chat_sessions):
     if chat_id in chat_sessions:
         logger.info(f"Переключение в чат {chat_titles[chat_id]} {chat_id}")
+        append_chat_log(chat_id, {
+            "event": "switch_chat",
+            "chat_id": chat_id,
+            "title": chat_titles.get(chat_id),
+            "time": datetime.now().isoformat()
+        })
         return (
             chat_id,
             chat_sessions[chat_id],
@@ -95,10 +116,17 @@ def rename_chat(new_title, current_chat_id, chat_titles):
         return chat_titles, gr.update(), ""
 
     logger.info(f"Переименование чата {current_chat_id} → {new_title}")
-
+    old_title = chat_titles[current_chat_id]
     chat_titles[current_chat_id] = new_title
     rename_chat_in_bd(current_chat_id, new_title)
-
+    # --- ЛОГ ---
+    append_chat_log(current_chat_id, {
+        "event": "rename_chat",
+        "old_title": old_title,
+        "new_title": new_title,
+        "chat_id": current_chat_id,
+        "time": datetime.now().isoformat()
+    })
     return (
         chat_titles,
         gr.update(choices=build_choices(chat_titles), value=current_chat_id),
@@ -117,13 +145,19 @@ def delete_chat(current_chat_id, chat_sessions, chat_titles):
         )
 
     logger.success(f"Удаление чата {chat_titles[current_chat_id]} ({current_chat_id})")
-
+    # --- ЛОГ ---
+    append_chat_log(current_chat_id, {
+        "event": "delete_chat",
+        "chat_id": current_chat_id,
+        "title": chat_titles[current_chat_id],
+        "time": datetime.now().isoformat()
+    })
     delete_chat_from_bd(current_chat_id)
     chat_sessions.pop(current_chat_id, None)
     chat_titles.pop(current_chat_id, None)
 
     new_id = next(iter(chat_titles), None) if chat_titles else None
-
+    
     return (
         new_id,
         chat_sessions,
