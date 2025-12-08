@@ -39,7 +39,7 @@ def add_user_message(message, chat_id, chat_sessions, chat_titles, user_id=None,
         "role": "user",
         "chat_id": chat_id,
         "content": message,
-        "time": datetime.now().isoformat()
+        "time": datetime.now().isoformat() # datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     })
     return (
         gr.update(value="", autofocus=True),
@@ -74,7 +74,7 @@ def new_chat(chat_sessions, chat_titles, user_id, session_id=None):
         "title": f"{base} {i}",
         "user_id": user_id,
         "session_id": session_id,
-        "time": datetime.now().isoformat()
+        "time": datetime.now().isoformat() # datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     })
     return (
         new_id,
@@ -92,7 +92,7 @@ def switch_chat(chat_id, chat_titles, chat_sessions):
             "event": "switch_chat",
             "chat_id": chat_id,
             "title": chat_titles.get(chat_id),
-            "time": datetime.now().isoformat()
+            "time": datetime.now().isoformat() # datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         })
         return (
             chat_id,
@@ -125,7 +125,7 @@ def rename_chat(new_title, current_chat_id, chat_titles):
         "old_title": old_title,
         "new_title": new_title,
         "chat_id": current_chat_id,
-        "time": datetime.now().isoformat()
+        "time": datetime.now().isoformat() # datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     })
     return (
         chat_titles,
@@ -150,7 +150,7 @@ def delete_chat(current_chat_id, chat_sessions, chat_titles):
         "event": "delete_chat",
         "chat_id": current_chat_id,
         "title": chat_titles[current_chat_id],
-        "time": datetime.now().isoformat()
+        "time": datetime.now().isoformat() # datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     })
     delete_chat_from_bd(current_chat_id)
     chat_sessions.pop(current_chat_id, None)

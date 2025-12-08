@@ -72,6 +72,6 @@ def fetch_llm_answer(_, chat_id, chat_sessions, user_id=None, session_id=None):
         "role": "assistant",
         "chat_id": chat_id,
         "content": answer,
-        "time": datetime.now().isoformat()
+        "time": datetime.now().isoformat() # datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     })
     return chat_sessions[chat_id], chat_sessions
