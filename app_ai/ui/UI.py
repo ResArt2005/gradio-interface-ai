@@ -63,5 +63,3 @@ class UI:
     avatar_upload: Optional[gr.File] = None
     avatar_change_btn: Optional[gr.Button] = None
     status_message: Optional[gr.Text] = None
-    # ----- Логи текущего чата -----
-    current_chat_logs: Optional[str] = None
