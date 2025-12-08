@@ -36,24 +36,17 @@ def download_chats_for_user(user_id: int) -> Dict[str, str]:
     return {str(row[0]): row[1] for row in rows} if rows else {}
 
 def append_chat_log(chat_id: str, log: dict) -> None:
-    """
-    Append a log entry to chats.chat_logs JSONB safely.
-
-    - Serializes `log` to a JSON string.
-    - Uses to_jsonb(CAST(:entry AS json)) in SQL so PostgreSQL receives JSON.
-    - Uses db.engine.begin() to run the statement with parameters.
-    """
     # always include a timestamp if not present
     if "time" not in log:
         log["time"] = datetime.utcnow().isoformat()
 
-    sql = text("""
+    sql = """
         UPDATE chats
         SET chat_logs = COALESCE(chat_logs, '[]'::jsonb) ||
                         to_jsonb(CAST(:entry AS json)),
             updated_at = NOW()
         WHERE chat_id = :cid;
-    """)
+    """
 
     params = {
         "cid": chat_id,
@@ -62,7 +55,6 @@ def append_chat_log(chat_id: str, log: dict) -> None:
     }
 
     # execute directly via engine to ensure parameters are passed exactly
-    with db.engine.begin() as conn:
-        conn.execute(sql, params)
+    db.insert(sql, params)
 
     logger.debug(f"Appended log to chat {chat_id}: {log}")
