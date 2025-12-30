@@ -85,7 +85,6 @@ def on_login_click(username, password, request: gr.Request):
             last_name,
             surname,
             e_mail,
-
             chat_sessions,        # ui.chat_sessions (State)
             chat_titles,          # ui.chat_titles (State)
             gr.update(choices=choices),
