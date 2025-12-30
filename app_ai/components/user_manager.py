@@ -1,6 +1,7 @@
 import gradio as gr
 from tools.dbpg.DB_users import replace_user_avatar, get_user_avatar_path, change_user_fio, change_user_email, is_uniqe_email, verify_password_hash, save_password, get_user_by_id
 from tools.debug import logger
+
 def on_avatar_change(file: str, user_id: int):
     if not user_id:
         return None, "Ошибка: пользователь не авторизован"
