@@ -15,7 +15,7 @@ def save_new_chat(chat_id: str, title: str, user_id: int) -> None:
 
 def delete_chat_from_bd(chat_id: str) -> None:
     """Delete a chat from the database."""
-    query = f"UPDATE chats SET chat_state='disabled' WHERE chat_id = '{chat_id}';"
+    query = f"UPDATE chats SET chat_state='deleted' WHERE chat_id = '{chat_id}';"
     db.insert(query)
     logger.info(f"Chat deleted from database with chat_id: {chat_id}")
 

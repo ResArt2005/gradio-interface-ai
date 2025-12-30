@@ -14,7 +14,7 @@ from frontend.unseen_elements import (
 from frontend.settings_element import ( avatar_settings_block, email_settings_block, FIO_block, change_password_block, back_to_main_panel_button
 )
 # Основной layout
-def build_interface():
+def build_interface()->gr.Blocks:
     custom_head = f"""
     <style>{styles_css}</style>
     <script>

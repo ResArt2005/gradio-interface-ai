@@ -7,5 +7,5 @@ CREATE TABLE IF NOT EXISTS chats (
     msg_count INTEGER NOT NULL DEFAULT 0,
 	chat_logs jsonb NULL,
 	chat_state varchar(8) DEFAULT 'active'::character varying NULL,
-	CONSTRAINT chats_chat_state_check CHECK ((((chat_state)::text = 'active'::text) OR ((chat_state)::text = 'disabled'::text)))
+	CONSTRAINT chats_chat_state_check CHECK ((((chat_state)::text = 'active'::text) OR ((chat_state)::text = 'deleted'::text)))
 );
