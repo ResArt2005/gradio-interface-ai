@@ -3,10 +3,8 @@ from pathlib import Path
 from tools.dbpg.DBPostgresqlGradio import db
 from tools.debug import logger
 import bcrypt
-from sqlalchemy import create_engine, text
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import text
 # Добавляем bcrypt для хэширования паролей
-import bcrypt
 from typing import Optional, Dict, Any
 MEDIA_DIR = Path("/app/media")
 

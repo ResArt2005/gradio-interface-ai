@@ -2,8 +2,7 @@ import datetime
 import json
 from tools.dbpg.DBPostgresqlGradio import db
 from tools.debug import logger
-from typing import Optional, Dict, Any
-from sqlalchemy import text
+from typing import Dict
 def save_new_chat(chat_id: str, title: str, user_id: int) -> None:
     """Save a new chat to the database."""
     query = f"""
