@@ -1,18 +1,20 @@
 import gradio as gr
+
 from bindings.bindings import bind_events
-from static.load_static import *
+from frontend.chat import chat_list_column, chatbot_column
+from frontend.settings_element import (
+    FIO_block,
+    avatar_settings_block,
+    back_to_main_panel_button,
+    change_password_block,
+    email_settings_block,
+)
+from frontend.unseen_elements import initialize_unseen_ui
+from frontend.user_elements import authenticate_user, debug_panel
+from static.load_static import *  # noqa: F403
 from ui.UI import UI
-from frontend.user_elements import (
-    authenticate_user, debug_panel
-)
-from frontend.chat import (
-    chat_list_column, chatbot_column
-)
-from frontend.unseen_elements import (
-    initialize_unseen_ui
-)
-from frontend.settings_element import ( avatar_settings_block, email_settings_block, FIO_block, change_password_block, back_to_main_panel_button
-)
+
+
 # Основной layout
 def build_interface()->gr.Blocks:
     custom_head = f"""
@@ -30,7 +32,7 @@ def build_interface()->gr.Blocks:
         }})();
     }});
     </script>
-    """
+    """  # noqa: F405
     # Инициализация UI-контейнера
     ui = UI()
     with gr.Blocks(head=custom_head) as interface:
