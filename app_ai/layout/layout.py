@@ -11,7 +11,7 @@ from frontend.settings_element import (
 )
 from frontend.unseen_elements import initialize_unseen_ui
 from frontend.user_elements import authenticate_user, debug_panel
-from static.load_static import *  # noqa: F403
+from static.load_static import *
 from ui.UI import UI
 
 
@@ -32,7 +32,7 @@ def build_interface()->gr.Blocks:
         }})();
     }});
     </script>
-    """  # noqa: F405
+    """
     # Инициализация UI-контейнера
     ui = UI()
     with gr.Blocks(head=custom_head) as interface:

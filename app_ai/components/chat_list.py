@@ -105,7 +105,7 @@ def switch_chat(chat_id, chat_titles, chat_sessions):
     return (
         gr.update(),     # current_chat_id
         [],              # chatbot
-        chat_sessions,   # ВАЖНО: НЕ СБРАСЫВАЕМ
+        chat_sessions,
         chat_titles
     )
 
