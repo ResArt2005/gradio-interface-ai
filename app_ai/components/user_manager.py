@@ -1,31 +1,72 @@
 import gradio as gr
 from tools.dbpg.DB_users import replace_user_avatar, get_user_avatar_path, change_user_fio, change_user_email, is_uniqe_email, verify_password_hash, save_password, get_user_by_id
 from tools.debug import logger
+from PIL import Image
+from io import BytesIO
+
+MAX_AVATAR_SIZE = 15 * 1024 * 1024  # 15 MB
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
+
+class AvatarValidationError(Exception):
+    pass
+
+def validate_and_sanitize_image(file_bytes: bytes, extension: str) -> bytes:
+    # --- Размер ---
+    if len(file_bytes) > MAX_AVATAR_SIZE:
+        raise AvatarValidationError("Файл превышает 15 МБ")
+
+    # --- Расширение ---
+    ext = extension.lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        raise AvatarValidationError("Допустимы только PNG и JPG")
+
+    # --- Проверка, что это реально изображение ---
+    try:
+        with Image.open(BytesIO(file_bytes)) as img:
+            img.verify()  # проверка целостности
+    except Exception:
+        raise AvatarValidationError("Файл не является корректным изображением")
+
+    # --- Повторно открываем (verify закрывает поток) ---
+    with Image.open(BytesIO(file_bytes)) as img:
+        img = img.convert("RGB") if img.mode not in ("RGB", "RGBA") else img
+
+        # --- Пересохранение (УБИВАЕТ вредоносный код) ---
+        output = BytesIO()
+        if ext in ("jpg", "jpeg"):
+            img.save(output, format="JPEG", quality=95, optimize=True)
+        else:
+            img.save(output, format="PNG", optimize=True)
+
+        return output.getvalue()
 
 def on_avatar_change(file: str, user_id: int):
     if not user_id:
         return None, "Ошибка: пользователь не авторизован"
 
-    # --- Если файл загружен ---
     if file:
         try:
-            # file — это строка: "/tmp/gradio/uploaded_image.png"
             with open(file, "rb") as f:
-                file_bytes = f.read()
+                raw_bytes = f.read()
 
             ext = file.split(".")[-1].lower()
 
-            new_path = replace_user_avatar(user_id, file_bytes, ext)
+            # 🔐 ВАЛИДАЦИЯ + ОЧИСТКА
+            safe_bytes = validate_and_sanitize_image(raw_bytes, ext)
+
+            new_path = replace_user_avatar(user_id, safe_bytes, ext)
 
             logger.info("Аватар обновлён для user_id=%s -> %s", user_id, new_path)
-
             return f"/app/{new_path}", "Аватар обновлён!"
+
+        except AvatarValidationError as e:
+            logger.warning("Невалидный аватар: %s", e)
+            return None, str(e)
 
         except Exception as e:
             logger.error("Ошибка при сохранении аватара: %s", e)
             return None, f"Ошибка при сохранении: {e}"
 
-    # --- Если файл НЕ выбран ---
     current = get_user_avatar_path(user_id)
     return (f"/app/{current}" if current else None), "Аватар не выбран"
 
