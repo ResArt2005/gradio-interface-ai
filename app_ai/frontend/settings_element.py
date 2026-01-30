@@ -16,7 +16,6 @@ def avatar_settings_block(ui: UI):
 
         ui.avatar_upload = gr.File(
             label="Выбрать файл",
-            file_types=[".png", ".jpg", ".jpeg"],
             elem_id="avatar_upload",
         )
 

@@ -1,4 +1,4 @@
-from components.user_manager import on_avatar_change, on_avatar_upload, fio_change, password_change, open_settings_panel, back_to_main_panel, email_change
+from components.user_manager import on_avatar_change, fio_change, password_change, open_settings_panel, back_to_main_panel, email_change
 from ui.UI import UI
     
 
@@ -9,13 +9,6 @@ def on_avatar_change_btn(ui: UI):
         outputs=[ui.avatar_preview, ui.status_message]
     )
 
-def on_avatar_upload_file(ui: UI):
-    pass
-    #ui.avatar_upload.change(
-    #    fn=on_avatar_upload,
-    #    inputs=[ui.avatar_upload],
-    #    outputs=[ui.status_message]
-    #)
 
 def open_settings_panel_btn(ui: UI):
     ui.open_settings_btn.click(

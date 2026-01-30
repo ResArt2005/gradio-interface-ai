@@ -29,6 +29,7 @@ def build_interface()->gr.Blocks:
             {Btn_Delete_js}
             {burgerMenu_js}
             {script_js}
+            {chooseAvatarFile_js}
         }})();
     }});
     </script>

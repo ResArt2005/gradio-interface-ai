@@ -8,4 +8,5 @@
   setFocusInput();
   setCustomResizable();
   setBurgerMenu();
+  set_choose_avatar_file();
 })();

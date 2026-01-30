@@ -71,33 +71,6 @@ def on_avatar_change(file: str, user_id: int):
     current = get_user_avatar_path(user_id)
     return (f"/app/{current}" if current else None), "Аватар не выбран"
 
-def on_avatar_upload(file: str):
-    pass
-    '''if not file:
-        return None, ""
-
-    try:
-        with open(file, "rb") as f:
-            data = f.read()
-
-        if len(data) > MAX_AVATAR_SIZE:
-            return None, "Файл больше 15 МБ"
-
-        from PIL import Image
-        from io import BytesIO
-
-        with Image.open(BytesIO(data)) as img:
-            img.verify()
-            if img.format not in ("PNG", "JPEG"):
-                return None, "Допустимы только PNG и JPG"
-
-        # ✅ файл ок — просто показываем превью
-        return "Файл загружен"
-
-    except Exception:
-        return "Некорректный файл"'''
-
-
 def fio_change(first_name: str, last_name: str, surname:str, user_id: int):
     if not user_id:
         return gr.update(''), gr.update(''), gr.update(''), "Ошибка: пользователь не авторизован"

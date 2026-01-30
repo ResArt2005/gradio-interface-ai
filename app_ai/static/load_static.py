@@ -25,4 +25,5 @@ simulateClickById_js = load_file("static/scripts/scriptsComponents/simulateClick
 fucusInput_js = load_file("static/scripts/global/focusInput.js")
 customResizable_js = load_file("static/scripts/global/customResizable.js")
 burgerMenu_js = load_file("static/scripts/global/burgerMenu.js")
+chooseAvatarFile_js = load_file("static/scripts/global/choose_avatar_file.js")
 # Добавить новый файл: new_file = load_file("path/to/new/file.js")
