@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS messages (
     num_order INTEGER NOT NULL,
     role VARCHAR(20) NOT NULL CHECK (role IN ('user', 'assistant', 'system', 'agent')),
     content VARCHAR(30000) NOT NULL,
-    timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
+    timestamp TIMESTAMP(0) NOT NULL DEFAULT NOW(),
     metadata JSONB
 );
 

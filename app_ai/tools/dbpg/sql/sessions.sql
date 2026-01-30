@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS sessions (
     session_id BIGSERIAL PRIMARY KEY,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    last_activity TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_at TIMESTAMP(0) NOT NULL DEFAULT NOW(),
+    last_activity TIMESTAMP(0) NOT NULL DEFAULT NOW(),
     user_ip varchar(50) NULL,
     user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     extra JSONB
