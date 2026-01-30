@@ -4,7 +4,8 @@ from tools.debug import logger
 from PIL import Image
 from io import BytesIO
 
-MAX_AVATAR_SIZE = 15 * 1024 * 1024  # 15 MB
+SIZE = 5
+MAX_AVATAR_SIZE = SIZE * 1024 * 1024  # 15 MB
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
 
 class AvatarValidationError(Exception):
@@ -13,7 +14,7 @@ class AvatarValidationError(Exception):
 def validate_and_sanitize_image(file_bytes: bytes, extension: str) -> bytes:
     # --- Размер ---
     if len(file_bytes) > MAX_AVATAR_SIZE:
-        raise AvatarValidationError("Файл превышает 15 МБ")
+        raise AvatarValidationError(f"Файл превышает {SIZE} МБ")
 
     # --- Расширение ---
     ext = extension.lower()

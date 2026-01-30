@@ -88,12 +88,12 @@ def new_chat(chat_sessions, chat_titles, user_id, session_id=None):
 def switch_chat(chat_id, chat_titles, chat_sessions):
     if chat_id in chat_sessions:
         logger.info(f"Переключение в чат {chat_titles[chat_id]} {chat_id}")
-        append_chat_log(chat_id, {
-            "event": "switch_chat",
-            "chat_id": chat_id,
-            "title": chat_titles.get(chat_id),
-            "time": datetime.now().isoformat() # datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        })
+        #append_chat_log(chat_id, {
+        #    "event": "switch_chat",
+        #    "chat_id": chat_id,
+        #    "title": chat_titles.get(chat_id),
+        #    "time": datetime.now().isoformat() # datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        #})
         return (
             chat_id,
             chat_sessions[chat_id],
